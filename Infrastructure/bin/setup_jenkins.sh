@@ -27,3 +27,53 @@ echo "Setting up Jenkins in project ${GUID}-jenkins from Git Repo ${REPO} for Cl
 # * CLUSTER: the base url of the cluster used (e.g. na39.openshift.opentlc.com)
 
 # To be Implemented by Student
+
+
+
+
+########################## start jenkins persistent
+#oc new-app jenkins-persistent --param ENABLE_OAUTH=true --param MEMORY_LIMIT=2Gi --param VOLUME_CAPACITY=4Gi
+oc process -f jenkins-persistent-template.yaml --param ENABLE_OAUTH=true --param MEMORY_LIMIT=2Gi --param VOLUME_CAPACITY=4Gi --param CPU_LIMIT=2000m | oc create -n $GUID-jenkins -f -
+########################## end jenkins persistent
+
+########################## start maven slave pod with skopeo
+#we probably cannot switch to root user => cannot use these commands
+#docker build ../templates/docker___jenkins_slave_pod \
+#-t docker-registry-default.apps.$GUID.example.opentlc.com/xyz-jenkins/jenkins-slave-maven-appdev:v3.9
+
+cat ../templates/docker___jenkins_slave_pod/Dockerfile | oc new-build --name=jenkins-slave-appdev -n $GUID-jenkins -D -
+##creates
+#build config
+#oc export buildconfigs/jenkins-slave-maven-centos7 > jenkins_slave_pod/buildconfig.yaml
+#imagestream imagestreams/jenkins-slave-maven-centos7 pointing to docker-registry.default.svc:5000/mons-xxx/jenkins-slave-maven-centos7
+#oc export imagestreams/jenkins-slave-maven-centos7 > jenkins_slave_pod/imagestream.yaml
+
+#should we oc start-build buildconfigs/jenkins-slave-appdev
+### here
+###   => only once, creates "latest" tag in imagestream
+### other possibilities? if we don't run it here, then when will the latest tag be built? when we try to instantiate a pod with the relevant name? (No, looks like it just waits for the pod template to be available)
+
+#sed 's/%GUID%/$GUID/g;s/%REPO%/$REPO/g;s/%CLUSTER%/$CLUSTER/g' ../templates/file.yaml | oc create -n $GUID-jenkins -f -
+########################## end maven slave pod with skopeo
+
+
+
+########################## start build for each microservice
+#MLBParks
+oc new-build --name=$GUID-mlbparks $REPO --context-dir=MLBParks
+#NationalParks
+oc new-build --name=$GUID-nationalparks $REPO --context-dir=Nationalparks
+#ParksMap
+oc new-build --name=$GUID-parksmap $REPO --context-dir=ParksMap
+
+#########start environment variables
+oc set env bc/$GUID-mlbparks GUID=$GUID CLUSTER=$CLUSTER
+oc set env bc/$GUID-nationalparks GUID=$GUID CLUSTER=$CLUSTER
+oc set env bc/$GUID-parksmap GUID=$GUID CLUSTER=$CLUSTER
+#note: none of these seem to create the environment variabiles
+#oc new-build --name=$GUID-mlbparks $REPO --context-dir=MLBParks --env=GUID=$GUID --env=CLUSTER=$CLUSTER
+#oc new-build --name=$GUID-mlbparks $REPO --context-dir=MLBParks -e GUID=$GUID
+#oc new-build --name=$GUID-mlbparks $REPO --context-dir=MLBParks -e GUID=$GUID
+#########END environment variables
+
+############################end build for each microservice

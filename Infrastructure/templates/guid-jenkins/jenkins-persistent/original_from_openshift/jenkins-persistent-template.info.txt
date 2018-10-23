@@ -1,0 +1,1 @@
+oc export templates jenkins-persistent -n openshift > jenkins-persisten-template.yaml

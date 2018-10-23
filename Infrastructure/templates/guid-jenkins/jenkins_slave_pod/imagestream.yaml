@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: ImageStream
+metadata:
+  annotations:
+    openshift.io/generated-by: OpenShiftNewBuild
+    openshift.io/image.dockerRepositoryCheck: 2018-10-22T13:50:33Z
+  creationTimestamp: null
+  generation: 3
+  labels:
+    build: jenkins-slave-maven-centos7
+  name: jenkins-slave-maven-centos7
+spec:
+  lookupPolicy:
+    local: false
+  tags:
+  - annotations: null
+    from:
+      kind: DockerImage
+      name: docker-registry.default.svc:5000/mons-xxx/jenkins-slave-maven-centos7:latest
+    generation: 3
+    importPolicy: {}
+    name: latest
+    referencePolicy:
+      type: Source
+  - annotations:
+      openshift.io/imported-from: docker.io/openshift/jenkins-slave-maven-centos7:v3.9
+    from:
+      kind: DockerImage
+      name: docker-registry.default.svc:5000/mons-xxx/jenkins-slave-maven-centos7:v3.9
+    generation: 3
+    importPolicy: {}
+    name: v3.9
+    referencePolicy:
+      type: Source
+status:
+  dockerImageRepository: ""
