@@ -33,7 +33,7 @@ echo "Setting up Jenkins in project ${GUID}-jenkins from Git Repo ${REPO} for Cl
 
 ########################## start jenkins persistent
 #oc new-app jenkins-persistent --param ENABLE_OAUTH=true --param MEMORY_LIMIT=2Gi --param VOLUME_CAPACITY=4Gi
-oc process -f jenkins-persistent-template.yaml --param ENABLE_OAUTH=true --param MEMORY_LIMIT=2Gi --param VOLUME_CAPACITY=4Gi --param CPU_LIMIT=2000m | oc create -n $GUID-jenkins -f -
+oc process -f ../templates/guid-jenkins/jenkins-persistent/jenkins-persistent-template.yaml --param ENABLE_OAUTH=true --param MEMORY_LIMIT=2Gi --param VOLUME_CAPACITY=4Gi --param CPU_LIMIT=2000m | oc create -n $GUID-jenkins -f -
 ########################## end jenkins persistent
 
 ########################## start maven slave pod with skopeo
@@ -48,12 +48,15 @@ cat ../templates/docker___jenkins_slave_pod/Dockerfile | oc new-build --name=jen
 #imagestream imagestreams/jenkins-slave-maven-centos7 pointing to docker-registry.default.svc:5000/mons-xxx/jenkins-slave-maven-centos7
 #oc export imagestreams/jenkins-slave-maven-centos7 > jenkins_slave_pod/imagestream.yaml
 
+#verify
+oc export bc,is -l name=jenkins-slave-appdev
+
 #should we oc start-build buildconfigs/jenkins-slave-appdev
 ### here
 ###   => only once, creates "latest" tag in imagestream
 ### other possibilities? if we don't run it here, then when will the latest tag be built? when we try to instantiate a pod with the relevant name? (No, looks like it just waits for the pod template to be available)
 
-#sed 's/%GUID%/$GUID/g;s/%REPO%/$REPO/g;s/%CLUSTER%/$CLUSTER/g' ../templates/file.yaml | oc create -n $GUID-jenkins -f -
+#sed "s/%GUID%/$GUID/g;s/%REPO%/$REPO/g;s/%CLUSTER%/$CLUSTER/g" ../templates/file.yaml | oc create -n $GUID-jenkins -f -
 ########################## end maven slave pod with skopeo
 
 

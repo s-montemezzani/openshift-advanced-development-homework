@@ -55,7 +55,7 @@ echo "Setting up Nexus in project $GUID-nexus"
 
 #comment#oc expose dc nexus3 --port=5000 --name=nexus-registry
 
-#comment#oc export dc,is,svc > nexus.yaml
+#comment#oc export dc,is,svc,pvc > nexus.yaml
 #change mons-5c83 with %GUID%
 #image stream will be trying to pull from docker-registry.default.svc:5000/mons-5c83-nexus/nexus3 , where the image is not available
 #  => change spec/tags/from/name to the external registry docker.io/sonatype/nexus3
