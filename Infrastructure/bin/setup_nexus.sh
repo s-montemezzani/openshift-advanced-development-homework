@@ -29,3 +29,56 @@ echo "Setting up Nexus in project $GUID-nexus"
 # oc new-app -f ../templates/nexus.yaml --param .....
 
 # To be Implemented by Student
+
+
+########################## start first setup with 'oc commands', then turning into .yaml templates
+#comment#oc new-app docker.io/sonatype/nexus3:latest
+#comment#oc rollout pause dc nexus3
+#comment#oc patch dc nexus3 --patch='{ "spec": { "strategy": { "type": "Recreate" }}}'
+#comment#oc set resources dc nexus3 --limits=memory=2Gi,cpu=2 --requests=memory=1Gi,cpu=500m
+#comment#echo "apiVersion: v1
+#comment#kind: PersistentVolumeClaim
+#comment#metadata:
+  #comment#name: nexus-pvc
+#comment#spec:
+  #comment#accessModes:
+  #comment#- ReadWriteOnce
+  #comment#resources:
+    #comment#requests:
+      #comment#storage: 4Gi" | oc create -f -
+
+#comment#oc set volume dc/nexus3 --add --overwrite --name=nexus3-volume-1 --mount-path=/nexus-data/ --type persistentVolumeClaim --claim-name=nexus-pvc
+#comment#oc set probe dc/nexus3 --liveness --failure-threshold 3 --initial-delay-seconds 60 -- echo ok
+#comment#oc set probe dc/nexus3 --readiness --failure-threshold 3 --initial-delay-seconds 60 --get-url=http://:8081/repository/maven-public/
+
+#comment#oc rollout resume dc nexus3
+
+#comment#oc expose dc nexus3 --port=5000 --name=nexus-registry
+
+#comment#oc export dc,is,svc > nexus.yaml
+#change mons-5c83 with %GUID%
+#image stream will be trying to pull from docker-registry.default.svc:5000/mons-5c83-nexus/nexus3 , where the image is not available
+#  => change spec/tags/from/name to the external registry docker.io/sonatype/nexus3
+
+#for routes
+#comment#oc expose svc nexus3
+#comment#oc create route edge nexus-registry --service=nexus-registry --port=5000
+#comment#oc export route > nexus_routes.yaml
+#change mons-5c83 with %GUID%
+
+########################## end first setup with 'oc commands', then turning into .yaml templates
+
+sed "s/%GUID%/$GUID/g" ../templates/guid-nexus/nexus.yaml | oc create -n $GUID-nexus -f -
+
+#wait for nexus to start up
+sleep 120
+
+curl -o setup_nexus3.sh -s https://raw.githubusercontent.com/wkulhanek/ocp_advanced_development_resources/master/nexus/setup_nexus3.sh
+chmod +x setup_nexus3.sh
+./setup_nexus3.sh admin admin123 nexus3.$GUID-nexus.svc.cluster.local:8081
+rm setup_nexus3.sh
+
+
+
+
+
