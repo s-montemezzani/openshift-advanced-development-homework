@@ -35,7 +35,7 @@ podTemplate(
       stage('Build war') {
         echo "Building version ${version}"
 
-        mvn -s ../nexus_settings.xml clean package -Dmaven.test.skip=true
+        sh "mvn -s ../nexus_settings.xml clean package -Dmaven.test.skip=true"
 
       }
 
