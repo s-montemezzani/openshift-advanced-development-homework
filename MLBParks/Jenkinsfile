@@ -20,7 +20,83 @@ podTemplate(
     // You need to build the application in directory `MLBParks`.
     // Also copy "../nexus_settings.xml" to your build directory
     // and replace 'GUID' in the file with your ${GUID} to point to >your< Nexus instance
- 
+
+    sh "sed -i 's/%GUID%/$GUID/g' ../nexus_settings.xml"
+
+    // Set the tag for the development image: version + build number
+    def devTag  = "${version}-${BUILD_NUMBER}"
+    // Set the tag for the production image: version
+    def prodTag = "${version}"
+    echo "devTag = ${devTag}"
+    echo "prodTag = ${prodTag}"
+
+      // Using Maven build the war file
+      // Do not run tests in this step
+      stage('Build war') {
+        echo "Building version ${version}"
+
+        mvn -s ../nexus_settings.xml clean package -Dmaven.test.skip=true
+
+      }
+
+  // Using Maven run the unit tests
+  stage('Unit Tests') {
+    echo "Running Unit Tests"
+    // TBD
+  }
+
+  // Using Maven call SonarQube for Code Analysis
+  stage('Code Analysis') {
+    echo "Running Code Analysis"
+    // TBD
+  }
+
+  // Publish the built war file to Nexus
+  stage('Publish to Nexus') {
+    echo "Publish to Nexus"
+    // TBD
+  }
+
+  // Build the OpenShift Image in OpenShift and tag it.
+  stage('Build and Tag OpenShift Image') {
+    echo "Building OpenShift container image tasks:${devTag}"
+   // TBD
+  }
+
+  // Deploy the built image to the Development Environment.
+  stage('Deploy to Dev') {
+    echo "Deploying container image to Development Project"
+    // TBD
+  }
+
+  // Run Integration Tests in the Development Environment.
+  stage('Integration Tests') {
+    echo "Running Integration Tests"
+    // TBD
+  }
+
+  // Copy Image to Nexus Docker Registry
+  stage('Copy Image to Nexus Docker Registry') {
+    echo "Copy image to Nexus Docker Registry"
+    // TBD
+  }
+
+  // Blue/Green Deployment into Production
+  // -------------------------------------
+  // Do not activate the new version yet.
+  def destApp   = "tasks-green"
+  def activeApp = ""
+
+  stage('Blue/Green Production Deployment') {
+    // TBD
+  }
+
+  stage('Switch over to new Version') {
+    // TBD
+    echo "Switching Production application to ${destApp}."
+    // TBD
+  }
+
   }
 }
 

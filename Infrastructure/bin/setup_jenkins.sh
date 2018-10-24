@@ -48,7 +48,7 @@ cat ../templates/docker___jenkins_slave_pod/Dockerfile | oc new-build --name=jen
 #imagestream imagestreams/jenkins-slave-maven-centos7 pointing to docker-registry.default.svc:5000/mons-xxx/jenkins-slave-maven-centos7
 #oc export imagestreams/jenkins-slave-maven-centos7 > jenkins_slave_pod/imagestream.yaml
 
-#verify
+#todo, verify
 oc export bc,is -l name=jenkins-slave-appdev
 
 #should we oc start-build buildconfigs/jenkins-slave-appdev
@@ -73,9 +73,8 @@ oc new-build --name=$GUID-parksmap $REPO --context-dir=ParksMap
 oc set env bc/$GUID-mlbparks GUID=$GUID CLUSTER=$CLUSTER
 oc set env bc/$GUID-nationalparks GUID=$GUID CLUSTER=$CLUSTER
 oc set env bc/$GUID-parksmap GUID=$GUID CLUSTER=$CLUSTER
-#note: none of these seem to create the environment variabiles
+#note: none of these (and others) seem to create the environment variabiles
 #oc new-build --name=$GUID-mlbparks $REPO --context-dir=MLBParks --env=GUID=$GUID --env=CLUSTER=$CLUSTER
-#oc new-build --name=$GUID-mlbparks $REPO --context-dir=MLBParks -e GUID=$GUID
 #oc new-build --name=$GUID-mlbparks $REPO --context-dir=MLBParks -e GUID=$GUID
 #########END environment variables
 
