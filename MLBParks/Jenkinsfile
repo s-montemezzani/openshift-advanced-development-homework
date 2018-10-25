@@ -25,22 +25,24 @@ podTemplate(
     stage('Checkout Source') {
       git url: '$REPO'
     }
+    stage('Modifying maven_settings.xml and valorizing variables') {
+        sh "pwd"
+        sh "ls -lrt"
+        cd MLBParks
+        sh "pwd"
+        sh "ls -lrt"
+        sh "ls -lrt ../nexus_settings.xml"
 
-    sh "pwd"
-    sh "ls -lrt"
-    sh "cd MLBParks"
-    sh "pwd"
-    sh "ls -lrt"
-    sh "ls -lrt ../nexus_settings.xml"
+        sh "sed -i 's/%GUID%/$GUID/g' ../nexus_settings.xml"
 
-    sh "sed -i 's/%GUID%/$GUID/g' ../nexus_settings.xml"
+        // Set the tag for the development image: version + build number
+        def devTag  = "${version}-${BUILD_NUMBER}"
+        // Set the tag for the production image: version
+        def prodTag = "${version}"
+        echo "devTag = ${devTag}"
+        echo "prodTag = ${prodTag}"
+    }
 
-    // Set the tag for the development image: version + build number
-    def devTag  = "${version}-${BUILD_NUMBER}"
-    // Set the tag for the production image: version
-    def prodTag = "${version}"
-    echo "devTag = ${devTag}"
-    echo "prodTag = ${prodTag}"
 
     // Using Maven build the war file
     // Do not run tests in this step
