@@ -26,8 +26,12 @@ podTemplate(
       git url: '$REPO'
     }
 
+    sh "pwd"
     sh "ls -lrt"
     sh "cd MLBParks"
+    sh "pwd"
+    sh "ls -lrt"
+    sh "ls -lrt ../nexus_settings.xml"
 
     sh "sed -i 's/%GUID%/$GUID/g' ../nexus_settings.xml"
 
