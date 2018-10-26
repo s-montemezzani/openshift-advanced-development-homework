@@ -1,0 +1,130 @@
+apiVersion: v1
+items:
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewBuild
+    creationTimestamp: null
+    labels:
+      build: mlbparks-pipeline
+    name: mlbparks-pipeline
+  spec:
+    nodeSelector: {}
+    output: {}
+    postCommit: {}
+    resources: {}
+    runPolicy: Serial
+    source:
+      contextDir: MLBParks
+      git:
+        ref: master
+        uri: %REPO%
+      type: Git
+    strategy:
+      jenkinsPipelineStrategy:
+        env:
+        - name: GUID
+          value: %GUID%
+        - name: CLUSTER
+          value: %CLUSTER%
+        - name: REPO
+          value: %REPO%
+        jenkinsfilePath: Jenkinsfile
+      type: JenkinsPipeline
+    triggers:
+    - github:
+        secret: h1Q_saITaPxAocu85nk3
+      type: GitHub
+    - generic:
+        secret: R8Rf7yxH3kDSxBacvB2q
+      type: Generic
+    - type: ConfigChange
+  status:
+    lastVersion: 0
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewBuild
+    creationTimestamp: null
+    labels:
+      build: nationalparks-pipeline
+    name: nationalparks-pipeline
+  spec:
+    nodeSelector: {}
+    output: {}
+    postCommit: {}
+    resources: {}
+    runPolicy: Serial
+    source:
+      contextDir: Nationalparks
+      git:
+        ref: master
+        uri: %REPO%
+      type: Git
+    strategy:
+      jenkinsPipelineStrategy:
+        env:
+        - name: GUID
+          value: %GUID%
+        - name: CLUSTER
+          value: %CLUSTER%
+        - name: REPO
+          value: %REPO%
+        jenkinsfilePath: Jenkinsfile
+      type: JenkinsPipeline
+    triggers:
+    - github:
+        secret: 8fyxT0HYtY3dqX3Q2i29
+      type: GitHub
+    - generic:
+        secret: B-Gq8qU8HV4pEmPPAcQ7
+      type: Generic
+    - type: ConfigChange
+  status:
+    lastVersion: 0
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewBuild
+    creationTimestamp: null
+    labels:
+      build: parksmap-pipeline
+    name: parksmap-pipeline
+  spec:
+    nodeSelector: {}
+    output: {}
+    postCommit: {}
+    resources: {}
+    runPolicy: Serial
+    source:
+      contextDir: ParksMap
+      git:
+        ref: master
+        uri: %REPO%
+      type: Git
+    strategy:
+      jenkinsPipelineStrategy:
+        env:
+        - name: GUID
+          value: %GUID%
+        - name: CLUSTER
+          value: %CLUSTER%
+        - name: REPO
+          value: %REPO%
+        jenkinsfilePath: Jenkinsfile
+      type: JenkinsPipeline
+    triggers:
+    - github:
+        secret: FtclsWZ4HssaT1QQx6vd
+      type: GitHub
+    - generic:
+        secret: DIz4Enxyc1kGTtWOO1MD
+      type: Generic
+    - type: ConfigChange
+  status:
+    lastVersion: 0
+kind: List
+metadata: {}

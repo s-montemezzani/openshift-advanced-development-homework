@@ -44,7 +44,7 @@ podTemplate(
     dir('MLBParks') {
 
         stage('Modifying maven_settings.xml') {
-            sh "sed -i 's/%GUID%/$GUID/g' ../nexus_settings.xml"
+            sh "sed -i 's/%GUID%/${GUID}/g' ../nexus_settings.xml"
         }
 
 
@@ -67,14 +67,14 @@ podTemplate(
       stage('Code Analysis') {
         echo "Running Code Analysis"
 
-        sh "mvn -s ../nexus_settings.xml sonar:sonar -Dsonar.host.url=http://sonarqube.$GUID.svc.cluster.local:9000 -Dsonar.projectName=${JOB_BASE_NAME}-${devTag}"
+        sh "mvn -s ../nexus_settings.xml sonar:sonar -Dsonar.host.url=http://sonarqube.${GUID}.svc.cluster.local:9000 -Dsonar.projectName=${JOB_BASE_NAME}-${devTag}"
       }
 
       // Publish the built war file to Nexus
       stage('Publish to Nexus') {
         echo "Publish to Nexus"
 
-        sh "mvn -s ../nexus_settings.xml deploy -DskipTests -DaltDeploymentRepository=nexus::default::http://nexus3.$GUID-nexus.svc.cluster.local:8081/repository/releases"
+        sh "mvn -s ../nexus_settings.xml deploy -DskipTests -DaltDeploymentRepository=nexus::default::http://nexus3.${GUID}-nexus.svc.cluster.local:8081/repository/releases"
       }
 
       // Build the OpenShift Image in OpenShift and tag it.

@@ -29,7 +29,7 @@ echo "Setting up Parks Development Environment in project ${GUID}-parks-dev"
  #Set deployment hooks to populate the database for the back end services
  ######## MLBParks/README.adoc
  ######## The endpoint `/ws/data/load/` creates the data in the MongoDB database and will need to be called (preferably with a post-deployment-hook) once the Pod is running.
-
+ ######## https://docs.openshift.com/container-platform/3.4/dev_guide/deployments/deployment_strategies.html#lifecycle-hooks
  #Set up liveness and readiness probes
  #Expose and label the services properly (parksmap-backend)
 
@@ -71,6 +71,10 @@ oc set env dc/parksmap-dev --from=configmap/parksmap-dev-configmap -n $GUID-park
 oc set probe dc/parksmap-dev --liveness --failure-threshold 3 --initial-delay-seconds 60 --get-url=http://:????-------BOH------????/ws/healthz -n $GUID-parks-dev
 oc set probe dc/parksmap-dev --readiness --failure-threshold 3 --initial-delay-seconds 60 --get-url=http://:????-------BOH------????/ws/healthz -n $GUID-parks-dev
 
+#deployment hook only for nationalparks, mlbparks, according to README.adoc
+#test
+oc set deployment-hook dc/nationalparks-dev \
+-- curl localhost:???boh???/ws/data/load/
 
 oc create configmap mlbparks-dev-configmap \
 --from-literal="DB_HOST=mongodb" \

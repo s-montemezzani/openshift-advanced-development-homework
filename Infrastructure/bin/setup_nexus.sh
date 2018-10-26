@@ -59,6 +59,12 @@ echo "Setting up Nexus in project $GUID-nexus"
 #change mons-5c83 with %GUID%
 #image stream will be trying to pull from docker-registry.default.svc:5000/mons-5c83-nexus/nexus3 , where the image is not available
 #  => change spec/tags/from/name to the external registry docker.io/sonatype/nexus3
+#pvc as exported will contain tags you have to remove (see yaml above)
+##metadata/anotations
+##metadata/creationTimestamp
+##spec/volumeName
+##status
+#
 
 #for routes
 #comment#oc expose svc nexus3
@@ -73,6 +79,8 @@ sed "s/%GUID%/$GUID/g" ../templates/guid-nexus/nexus.yaml | oc create -n $GUID-n
 #wait for nexus to start up
 sleep 120
 
+#check if the slave pod created by the grading jenkins can curl, write files to current directory, remove at the end, ......
+#cd /tmp
 curl -o setup_nexus3.sh -s https://raw.githubusercontent.com/wkulhanek/ocp_advanced_development_resources/master/nexus/setup_nexus3.sh
 chmod +x setup_nexus3.sh
 ./setup_nexus3.sh admin admin123 nexus3.$GUID-nexus.svc.cluster.local:8081

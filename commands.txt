@@ -1,5 +1,5 @@
 export GUID=mons-5c83
-export REPO=https://github.com/wkulhanek/advdev_homework_template
+export REPO=https://github.com/s-montemezzani/openshift-advanced-development-homework.git
 export CLUSTER=na39.openshift.opentlc.com
 export CLUSTER=https://master.na39.openshift.opentlc.com
 

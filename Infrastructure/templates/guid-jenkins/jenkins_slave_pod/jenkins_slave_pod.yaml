@@ -1,0 +1,98 @@
+apiVersion: v1
+items:
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewBuild
+    creationTimestamp: null
+    labels:
+      build: jenkins-slave-appdev
+    name: jenkins-slave-appdev
+  spec:
+    failedBuildsHistoryLimit: 5
+    nodeSelector: null
+    output:
+      to:
+        kind: ImageStreamTag
+        name: jenkins-slave-appdev:latest
+    postCommit: {}
+    resources: {}
+    runPolicy: Serial
+    source:
+      dockerfile: "FROM docker.io/openshift/jenkins-slave-maven-centos7:v3.9\r\nUSER
+        root\r\nRUN yum -y install skopeo apb && \\\r\n    yum clean all\r\nUSER 1001"
+      type: Dockerfile
+    strategy:
+      dockerStrategy:
+        from:
+          kind: ImageStreamTag
+          name: jenkins-slave-maven-centos7:v3.9
+      type: Docker
+    successfulBuildsHistoryLimit: 5
+    triggers:
+    - github:
+        secret: b6GcV0Dl7SEsfduKVxQR
+      type: GitHub
+    - generic:
+        secret: Hm3a98FyOLRNtqo1Egun
+      type: Generic
+    - type: ConfigChange
+    - imageChange: {}
+      type: ImageChange
+  status:
+    lastVersion: 0
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewBuild
+    creationTimestamp: null
+    generation: 1
+    labels:
+      build: jenkins-slave-appdev
+    name: jenkins-slave-appdev
+  spec:
+    lookupPolicy:
+      local: false
+    tags:
+    - annotations: null
+      from:
+        kind: DockerImage
+        name: docker-registry.default.svc:5000/%GUID%-jenkins/jenkins-slave-appdev:latest
+      generation: null
+      importPolicy: {}
+      name: latest
+      referencePolicy:
+        type: ""
+  status:
+    dockerImageRepository: ""
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewBuild
+      openshift.io/image.dockerRepositoryCheck: 2018-10-25T05:12:58Z
+    creationTimestamp: null
+    generation: 2
+    labels:
+      build: jenkins-slave-appdev
+    name: jenkins-slave-maven-centos7
+  spec:
+    lookupPolicy:
+      local: false
+    tags:
+    - annotations:
+        openshift.io/imported-from: docker.io/openshift/jenkins-slave-maven-centos7:v3.9
+      from:
+        kind: DockerImage
+        name: docker.io/openshift/jenkins-slave-maven-centos7:v3.9
+      generation: 2
+      importPolicy: {}
+      name: v3.9
+      referencePolicy:
+        type: Source
+  status:
+    dockerImageRepository: ""
+kind: List
+metadata: {}

@@ -41,41 +41,34 @@ oc process -f ../templates/guid-jenkins/jenkins-persistent/jenkins-persistent-te
 #docker build ../templates/docker___jenkins_slave_pod \
 #-t docker-registry-default.apps.$GUID.example.opentlc.com/xyz-jenkins/jenkins-slave-maven-appdev:v3.9
 
-cat ../templates/docker___jenkins_slave_pod/Dockerfile | oc new-build --name=jenkins-slave-appdev -n $GUID-jenkins -D -
-##creates
-#build config
-#oc export buildconfigs/jenkins-slave-maven-centos7 > jenkins_slave_pod/buildconfig.yaml
-#imagestream imagestreams/jenkins-slave-maven-centos7 pointing to docker-registry.default.svc:5000/mons-xxx/jenkins-slave-maven-centos7
-#oc export imagestreams/jenkins-slave-maven-centos7 > jenkins_slave_pod/imagestream.yaml
+#cat ../templates/guid-jenkins/docker___jenkins_slave_pod/Dockerfile | oc new-build --name=jenkins-slave-appdev -n $GUID-jenkins -D -
+#oc export bc,is -l build=jenkins-slave-appdev > jenkins_slave_pod.yaml
 
-#todo, verify
-oc export bc,is -l name=jenkins-slave-appdev
+sed "s/%GUID%/$GUID/g" ../templates/guid-jenkins/jenkins_slave_pod/jenkins_slave_pod.yaml | oc create -n $GUID-jenkins -f -
 
-#should we oc start-build buildconfigs/jenkins-slave-appdev
-### here
-###   => only once, creates "latest" tag in imagestream
-### other possibilities? if we don't run it here, then when will the latest tag be built? when we try to instantiate a pod with the relevant name? (No, looks like it just waits for the pod template to be available)
-
-#sed "s/%GUID%/$GUID/g;s/%REPO%/$REPO/g;s/%CLUSTER%/$CLUSTER/g" ../templates/file.yaml | oc create -n $GUID-jenkins -f -
+#build already started with above oc create
+#oc start-build bc/jenkins-slave-appdev
 ########################## end maven slave pod with skopeo
 
 
 
 ########################## start build for each microservice
 #MLBParks
-oc new-build --name=$GUID-mlbparks $REPO --context-dir=MLBParks
+oc new-build --name=mlbparks-pipeline $REPO --context-dir=MLBParks -n $GUID-jenkins
 #NationalParks
-oc new-build --name=$GUID-nationalparks $REPO --context-dir=Nationalparks
+oc new-build --name=nationalparks-pipeline $REPO --context-dir=Nationalparks -n $GUID-jenkins
 #ParksMap
-oc new-build --name=$GUID-parksmap $REPO --context-dir=ParksMap
+oc new-build --name=parksmap-pipeline $REPO --context-dir=ParksMap -n $GUID-jenkins
 
 #########start environment variables
-oc set env bc/$GUID-mlbparks GUID=$GUID CLUSTER=$CLUSTER
-oc set env bc/$GUID-nationalparks GUID=$GUID CLUSTER=$CLUSTER
-oc set env bc/$GUID-parksmap GUID=$GUID CLUSTER=$CLUSTER
-#note: none of these (and others) seem to create the environment variabiles
-#oc new-build --name=$GUID-mlbparks $REPO --context-dir=MLBParks --env=GUID=$GUID --env=CLUSTER=$CLUSTER
-#oc new-build --name=$GUID-mlbparks $REPO --context-dir=MLBParks -e GUID=$GUID
+oc set env bc/mlbparks-pipeline GUID=$GUID CLUSTER=$CLUSTER REPO=$REPO -n $GUID-jenkins
+oc set env bc/nationalparks-pipeline GUID=$GUID CLUSTER=$CLUSTER REPO=$REPO -n $GUID-jenkins
+oc set env bc/parksmap-pipeline GUID=$GUID CLUSTER=$CLUSTER REPO=$REPO -n $GUID-jenkins
 #########END environment variables
+
+#remove the skopeo bc before running this
+#oc export bc > 3apps_buildconfig_jenkins_pipeline.yaml
+
+sed "s/%GUID%/$GUID/g;s/%CLUSTER%/$CLUSTER/g;s~%REPO%~$REPO~g" ../templates/guid-jenkins/3apps_buildconfig_jenkins_pipeline.yaml | oc create -n $GUID-jenkins -f -
 
 ############################end build for each microservice
