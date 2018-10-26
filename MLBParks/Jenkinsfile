@@ -56,37 +56,44 @@ podTemplate(
             sh "mvn -s ../nexus_settings.xml clean package -Dmaven.test.skip=true"
         }
 
-      // Using Maven run the unit tests
-      stage('Unit Tests') {
-        echo "Running Unit Tests"
+      parallel {
+          // Using Maven run the unit tests
+          stage('Unit Tests') {
+            echo "Running Unit Tests"
 
-        sh "mvn -s ../nexus_settings.xml test"
-      }
+            sh "mvn -s ../nexus_settings.xml test"
+          }
 
-      // Using Maven call SonarQube for Code Analysis
-      stage('Code Analysis') {
-        echo "Running Code Analysis"
+          // Using Maven call SonarQube for Code Analysis
+          stage('Code Analysis') {
+            echo "Running Code Analysis"
 
-        sh "mvn -s ../nexus_settings.xml sonar:sonar -Dsonar.host.url=http://sonarqube.${GUID}.svc.cluster.local:9000 -Dsonar.projectName=${JOB_BASE_NAME}-${devTag}"
+            sh "mvn -s ../nexus_settings.xml sonar:sonar -Dsonar.host.url=http://sonarqube.${GUID}.svc.cluster.local:9000 -Dsonar.projectName=${JOB_BASE_NAME}-${devTag}"
+          }
       }
 
       // Publish the built war file to Nexus
       stage('Publish to Nexus') {
         echo "Publish to Nexus"
 
-        sh "mvn -s ../nexus_settings.xml deploy -DskipTests -DaltDeploymentRepository=nexus::default::http://nexus3.${GUID}-nexus.svc.cluster.local:8081/repository/releases"
+        sh "mvn -s ../nexus_settings.xml deploy -DskipTests=true -DaltDeploymentRepository=nexus::default::http://nexus3.${GUID}-nexus.svc.cluster.local:8081/repository/releases"
       }
 
       // Build the OpenShift Image in OpenShift and tag it.
       stage('Build and Tag OpenShift Image') {
         echo "Building OpenShift container image tasks:${devTag}"
 
-        sh "oc start-build tasks --follow --from-file=./target/mlbparks.jar -n $GUID-parks-dev"
+        sh "oc start-build mlbparks-dev --follow --from-file=./target/mlbparks.jar -n $GUID-parks-dev"
+
+
+        sh "oc start-build mlbparks-dev --follow --from-file=./target/mlbparks.jar -n $GUID-parks-dev"
 
         /*
         openshiftVerifyBuild bldCfg: 'tasks', checkForTriggeredDeployments: 'false',
                              namespace: 'mons-tasks-dev', verbose: 'false', waitTime: ''
+        */
 
+        /*
         openshiftTag alias: 'false', destStream: 'tasks', destTag: devTag,
                      destinationNamespace: 'mons-tasks-dev', namespace: 'mons-tasks-dev',
                      srcStream: 'tasks', srcTag: 'latest', verbose: 'false'

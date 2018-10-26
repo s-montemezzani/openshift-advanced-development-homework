@@ -54,16 +54,16 @@ sed "s/%GUID%/$GUID/g" ../templates/guid-jenkins/jenkins_slave_pod/jenkins_slave
 
 ########################## start build for each microservice
 #MLBParks
-oc new-build --name=mlbparks-pipeline $REPO --context-dir=MLBParks -n $GUID-jenkins
+#oc new-build --name=mlbparks-pipeline $REPO --context-dir=MLBParks -n $GUID-jenkins
 #NationalParks
-oc new-build --name=nationalparks-pipeline $REPO --context-dir=Nationalparks -n $GUID-jenkins
+#oc new-build --name=nationalparks-pipeline $REPO --context-dir=Nationalparks -n $GUID-jenkins
 #ParksMap
-oc new-build --name=parksmap-pipeline $REPO --context-dir=ParksMap -n $GUID-jenkins
+#oc new-build --name=parksmap-pipeline $REPO --context-dir=ParksMap -n $GUID-jenkins
 
 #########start environment variables
-oc set env bc/mlbparks-pipeline GUID=$GUID CLUSTER=$CLUSTER REPO=$REPO -n $GUID-jenkins
-oc set env bc/nationalparks-pipeline GUID=$GUID CLUSTER=$CLUSTER REPO=$REPO -n $GUID-jenkins
-oc set env bc/parksmap-pipeline GUID=$GUID CLUSTER=$CLUSTER REPO=$REPO -n $GUID-jenkins
+#oc set env bc/mlbparks-pipeline GUID=$GUID CLUSTER=$CLUSTER REPO=$REPO -n $GUID-jenkins
+#oc set env bc/nationalparks-pipeline GUID=$GUID CLUSTER=$CLUSTER REPO=$REPO -n $GUID-jenkins
+#oc set env bc/parksmap-pipeline GUID=$GUID CLUSTER=$CLUSTER REPO=$REPO -n $GUID-jenkins
 #########END environment variables
 
 #remove the skopeo bc before running this

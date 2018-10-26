@@ -16,8 +16,7 @@ echo "Setting up Sonarqube in project $GUID-sonarqube"
 # To be Implemented by Student
 
 ########################## start first setup with 'oc commands', then turning into .yaml templates
-#comment#oc new-app --template=postgresql-persistent --param POSTGRESQL_USER=sonar --param POSTGRESQL_PASSWORD=sonar --param POSTGRESQL_DATABASE=sonar --param VOLUME_CAPACITY=4Gi --labels=app=sonarqube_db
-#comment#oc export template postgresql-persistent -n openshift > postgresql-persistent.yaml
+#comment#oc new-app --template=postgresql-persistent --param POSTGRESQL_USER=sonar --param POSTGRESQL_PASSWORD=sonar --param POSTGRESQL_DATABASE=sonar --param VOLUME_CAPACITY=4Gi --labels=app=sonarqube_db #comment#oc export template postgresql-persistent -n openshift > postgresql-persistent.yaml
 
 
 #comment#oc new-app --file=../templates/guid-sonarqube/postgresql-persistent.yaml --param POSTGRESQL_USER=sonar --param POSTGRESQL_PASSWORD=sonar --param POSTGRESQL_DATABASE=sonar --param VOLUME_CAPACITY=4Gi --labels=app=sonarqube_db

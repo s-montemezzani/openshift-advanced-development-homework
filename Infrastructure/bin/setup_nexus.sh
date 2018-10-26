@@ -77,7 +77,7 @@ echo "Setting up Nexus in project $GUID-nexus"
 sed "s/%GUID%/$GUID/g" ../templates/guid-nexus/nexus.yaml | oc create -n $GUID-nexus -f -
 
 #wait for nexus to start up
-sleep 120
+sleep 240
 
 #check if the slave pod created by the grading jenkins can curl, write files to current directory, remove at the end, ......
 #cd /tmp

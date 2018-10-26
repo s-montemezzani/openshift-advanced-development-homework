@@ -163,10 +163,6 @@ items:
 - apiVersion: v1
   kind: PersistentVolumeClaim
   metadata:
-    annotations:
-      pv.kubernetes.io/bind-completed: "yes"
-      pv.kubernetes.io/bound-by-controller: "yes"
-    creationTimestamp: null
     name: sonarqube-pvc
   spec:
     accessModes:
@@ -174,7 +170,5 @@ items:
     resources:
       requests:
         storage: 4Gi
-    volumeName: vol214
-  status: {}
 kind: List
 metadata: {}

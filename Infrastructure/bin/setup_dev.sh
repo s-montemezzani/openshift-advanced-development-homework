@@ -35,11 +35,11 @@ echo "Setting up Parks Development Environment in project ${GUID}-parks-dev"
 
 oc policy add-role-to-user edit system:serviceaccount:$GUID-jenkins:jenkins -n $GUID-parks-dev
 
-oc new-app registry.access.redhat.com/rhscl/mongodb-34-rhel7:latest --name="mongodb"
+#oc new-app registry.access.redhat.com/rhscl/mongodb-34-rhel7:latest --name="mongodb"
+#oc export svc,is,dc > mongodb.yaml
 
+sed "s/%GUID%/$GUID/g" ../templates/guid-parks-dev/mongodb_dev.yaml | oc create -n $GUID-parks-dev -f -
 
-
-oc export svc,is,dc > mongodb.yaml
 
 #let's make for each application a .yaml file with
 ### buildconfig
@@ -55,6 +55,13 @@ oc new-build --binary=true --name="nationalparks-dev" redhat-openjdk18-openshift
 #needs imagestream => after new-build
 oc new-app $GUID-parks-dev/parksmap-dev:0.0-0 --name=parksmap-dev --allow-missing-imagestream-tags=true -n $GUID-parks-dev
 oc set triggers dc/parksmap-dev --remove-all -n $GUID-parks-dev
+
+oc new-app $GUID-parks-dev/mlbparks-dev:0.0-0 --name=mlbparks-dev --allow-missing-imagestream-tags=true -n $GUID-parks-dev
+oc set triggers dc/mlbparks-dev --remove-all -n $GUID-parks-dev
+
+oc new-app $GUID-parks-dev/nationalparks-dev:0.0-0 --name=nationalparks-dev --allow-missing-imagestream-tags=true -n $GUID-parks-dev
+oc set triggers dc/nationalparks-dev --remove-all -n $GUID-parks-dev
+
 #let's skip the oc expose for now
 
 oc create configmap parksmap-dev-configmap \
@@ -65,16 +72,6 @@ oc create configmap parksmap-dev-configmap \
 --from-literal="DB_NAME=parks" \
 --from-literal="APPNAME=ParksMap (Dev)" \
 -n $GUID-parks-dev
-
-oc set env dc/parksmap-dev --from=configmap/parksmap-dev-configmap -n $GUID-parks-dev
-
-oc set probe dc/parksmap-dev --liveness --failure-threshold 3 --initial-delay-seconds 60 --get-url=http://:????-------BOH------????/ws/healthz -n $GUID-parks-dev
-oc set probe dc/parksmap-dev --readiness --failure-threshold 3 --initial-delay-seconds 60 --get-url=http://:????-------BOH------????/ws/healthz -n $GUID-parks-dev
-
-#deployment hook only for nationalparks, mlbparks, according to README.adoc
-#test
-oc set deployment-hook dc/nationalparks-dev \
--- curl localhost:???boh???/ws/data/load/
 
 oc create configmap mlbparks-dev-configmap \
 --from-literal="DB_HOST=mongodb" \
@@ -93,6 +90,34 @@ oc create configmap nationalparks-dev-configmap \
 --from-literal="DB_NAME=parks" \
 --from-literal="APPNAME=National Parks (Dev)" \
 -n $GUID-parks-dev
+
+oc set env dc/parksmap-dev --from=configmap/parksmap-dev-configmap -n $GUID-parks-dev
+oc set env dc/mlbparks-dev --from=configmap/mlbparks-dev-configmap -n $GUID-parks-dev
+oc set env dc/nationalparks-dev --from=configmap/nationalparks-dev-configmap -n $GUID-parks-dev
+
+oc set probe dc/parksmap-dev --liveness --failure-threshold 3 --initial-delay-seconds 60 --get-url=http://:80/ws/healthz -n $GUID-parks-dev
+oc set probe dc/parksmap-dev --readiness --failure-threshold 3 --initial-delay-seconds 60 --get-url=http://:80/ws/healthz -n $GUID-parks-dev
+
+oc set probe dc/mlbparks-dev --liveness --failure-threshold 3 --initial-delay-seconds 60 --get-url=http://:80/ws/healthz -n $GUID-parks-dev
+oc set probe dc/mlbparks-dev --readiness --failure-threshold 3 --initial-delay-seconds 60 --get-url=http://:80/ws/healthz -n $GUID-parks-dev
+
+oc set probe dc/nationalparks-dev --liveness --failure-threshold 3 --initial-delay-seconds 60 --get-url=http://:80/ws/healthz -n $GUID-parks-dev
+oc set probe dc/nationalparks-dev --readiness --failure-threshold 3 --initial-delay-seconds 60 --get-url=http://:80/ws/healthz -n $GUID-parks-dev
+
+#deployment hook only for nationalparks, mlbparks, according to README.adoc
+#test
+oc set deployment-hook --post dc/nationalparks-dev \
+-- curl localhost:80/ws/data/load/
+oc set deployment-hook --post dc/mlbparks-dev \
+-- curl localhost:80/ws/data/load/
+
+
+oc export dc,bc,is,cm > 3apps_dev_binary_builds.yaml
+
+sed "s/%GUID%/$GUID/g" ../templates/guid-parks-dev/3apps_dev_binary_builds.yaml | oc create -n $GUID-parks-dev -f -
+
+
+
 
 /*
 MLBParks expects the MongoDB connection information in the following environment variables:
