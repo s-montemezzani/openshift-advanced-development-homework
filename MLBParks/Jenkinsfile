@@ -68,7 +68,7 @@ podTemplate(
       stage('Code Analysis') {
         echo "Running Code Analysis"
 
-        sh "mvn -s ../nexus_settings.xml sonar:sonar -Dsonar.host.url=http://sonarqube.${GUID}.svc.cluster.local:9000 -Dsonar.projectName=${JOB_BASE_NAME}-${devTag}"
+        sh "mvn -s ../nexus_settings.xml sonar:sonar -Dsonar.host.url=http://sonarqube.${GUID}-sonarqube.svc.cluster.local:9000 -Dsonar.projectName=${JOB_BASE_NAME}-${devTag}"
       }
 
       // Publish the built war file to Nexus
