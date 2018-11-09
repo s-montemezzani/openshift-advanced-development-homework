@@ -70,6 +70,19 @@ items:
           volumeMounts:
           - mountPath: /var/lib/mongodb/data
             name: mongodb-volume-1
+          env:
+            - name: MONGODB_DATABASE
+              value: "parks"
+            - name: MONGODB_USER
+              value: "mongodb"
+            - name: MONGODB_PASSWORD
+              value: "mongodb"
+            - name: MONGODB_ADMIN_PASSWORD
+              value: "mongodb"
+            - name: MONGODB_KEYFILE_VALUE
+              value: "12345678901234567890"
+            - name: MONGODB_SERVICE_NAME
+              value: "mongodb"
         dnsPolicy: ClusterFirst
         restartPolicy: Always
         schedulerName: default-scheduler

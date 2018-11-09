@@ -36,7 +36,18 @@ echo "Setting up Parks Development Environment in project ${GUID}-parks-dev"
 oc policy add-role-to-user edit system:serviceaccount:$GUID-jenkins:jenkins -n $GUID-parks-dev
 
 #oc new-app registry.access.redhat.com/rhscl/mongodb-34-rhel7:latest --name="mongodb"
-#oc export svc,is,dc > mongodb.yaml
+oc new-app registry.access.redhat.com/rhscl/mongodb-34-rhel7:latest --name="mongodb" \
+--env=MONGODB_DATABASE=parks \
+--env=MONGODB_USER=mongodb \
+--env=MONGODB_PASSWORD=mongodb \
+--env=MONGODB_ADMIN_PASSWORD=admin \
+--env=MONGODB_KEYFILE_VALUE=12345678901234567890 \
+--env=MONGODB_SERVICE_NAME=admin
+
+#is this only for replicated? i.e. when pod is started with run-mongod-replication
+#oc set probe dc/mongodb --liveness --failure-threshold 3 --initial-delay-seconds -- stat /tmp/initialized
+#oc set probe dc/mongodb --readiness --failure-threshold 3 --initial-delay-seconds -- stat /tmp/initialized
+#oc export svc,dc,is > mongodb.yaml
 
 sed "s/%GUID%/$GUID/g" ../templates/guid-parks-dev/mongodb_dev.yaml | oc create -n $GUID-parks-dev -f -
 
@@ -63,6 +74,10 @@ oc new-app $GUID-parks-dev/nationalparks-dev:0.0-0 --name=nationalparks-dev --al
 oc set triggers dc/nationalparks-dev --remove-all -n $GUID-parks-dev
 
 #let's skip the oc expose for now
+oc expose dc mlbparks-dev --port=8080 -n $GUID-parks-dev
+oc label svc mlbparks-dev type=parksmap-backend -n $GUID-parks-dev
+oc expose dc nationalparks-dev --port=8080 -n $GUID-parks-dev
+oc label svc nationalparks-dev type=parksmap-backend -n $GUID-parks-dev
 
 oc create configmap parksmap-dev-configmap \
 --from-literal="DB_HOST=mongodb" \
@@ -95,29 +110,26 @@ oc set env dc/parksmap-dev --from=configmap/parksmap-dev-configmap -n $GUID-park
 oc set env dc/mlbparks-dev --from=configmap/mlbparks-dev-configmap -n $GUID-parks-dev
 oc set env dc/nationalparks-dev --from=configmap/nationalparks-dev-configmap -n $GUID-parks-dev
 
-oc set probe dc/parksmap-dev --liveness --failure-threshold 3 --initial-delay-seconds 60 --get-url=http://:80/ws/healthz -n $GUID-parks-dev
-oc set probe dc/parksmap-dev --readiness --failure-threshold 3 --initial-delay-seconds 60 --get-url=http://:80/ws/healthz -n $GUID-parks-dev
+oc set probe dc/parksmap-dev --liveness --failure-threshold 3 --initial-delay-seconds 60 --get-url=http://:8080/ws/healthz -n $GUID-parks-dev
+oc set probe dc/parksmap-dev --readiness --failure-threshold 3 --initial-delay-seconds 60 --get-url=http://:8080/ws/healthz -n $GUID-parks-dev
 
-oc set probe dc/mlbparks-dev --liveness --failure-threshold 3 --initial-delay-seconds 60 --get-url=http://:80/ws/healthz -n $GUID-parks-dev
-oc set probe dc/mlbparks-dev --readiness --failure-threshold 3 --initial-delay-seconds 60 --get-url=http://:80/ws/healthz -n $GUID-parks-dev
+oc set probe dc/mlbparks-dev --liveness --failure-threshold 3 --initial-delay-seconds 60 --get-url=http://:8080/ws/healthz -n $GUID-parks-dev
+oc set probe dc/mlbparks-dev --readiness --failure-threshold 3 --initial-delay-seconds 60 --get-url=http://:8080/ws/healthz -n $GUID-parks-dev
 
-oc set probe dc/nationalparks-dev --liveness --failure-threshold 3 --initial-delay-seconds 60 --get-url=http://:80/ws/healthz -n $GUID-parks-dev
-oc set probe dc/nationalparks-dev --readiness --failure-threshold 3 --initial-delay-seconds 60 --get-url=http://:80/ws/healthz -n $GUID-parks-dev
+oc set probe dc/nationalparks-dev --liveness --failure-threshold 3 --initial-delay-seconds 60 --get-url=http://:8080/ws/healthz -n $GUID-parks-dev
+oc set probe dc/nationalparks-dev --readiness --failure-threshold 3 --initial-delay-seconds 60 --get-url=http://:8080/ws/healthz -n $GUID-parks-dev
 
 #deployment hook only for nationalparks, mlbparks, according to README.adoc
 #test
 oc set deployment-hook --post dc/nationalparks-dev \
--- curl localhost:80/ws/data/load/
+-- curl localhost:8080/ws/data/load/
 oc set deployment-hook --post dc/mlbparks-dev \
--- curl localhost:80/ws/data/load/
+-- curl localhost:8080/ws/data/load/
 
 
-oc export dc,bc,is,cm > 3apps_dev_binary_builds.yaml
+oc export dc,bc,is,cm,svc > 3apps_dev_binary_builds.yaml
 
 sed "s/%GUID%/$GUID/g" ../templates/guid-parks-dev/3apps_dev_binary_builds.yaml | oc create -n $GUID-parks-dev -f -
-
-
-
 
 /*
 MLBParks expects the MongoDB connection information in the following environment variables:
@@ -137,3 +149,7 @@ Valid values are:
 * APPNAME="MLB Parks (Blue)"
 
 */
+
+
+oc expose mlbparks-dev
+oc rollout latest mlbparks-dev -n ${GUID}-parks-dev

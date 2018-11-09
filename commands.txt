@@ -1,6 +1,7 @@
 export GUID=mons-5c83
 export REPO=https://github.com/s-montemezzani/openshift-advanced-development-homework.git
 export CLUSTER=na39.openshift.opentlc.com
+export USER=simone.montemezzani-avaloq.com
 export CLUSTER=https://master.na39.openshift.opentlc.com
 
 ~/Infrastructure/bin/setup_jenkins.sh mons-5c83 repo https://master.na39.openshift.opentlc.com

@@ -16,7 +16,8 @@ echo "Setting up Sonarqube in project $GUID-sonarqube"
 # To be Implemented by Student
 
 ########################## start first setup with 'oc commands', then turning into .yaml templates
-#comment#oc new-app --template=postgresql-persistent --param POSTGRESQL_USER=sonar --param POSTGRESQL_PASSWORD=sonar --param POSTGRESQL_DATABASE=sonar --param VOLUME_CAPACITY=4Gi --labels=app=sonarqube_db #comment#oc export template postgresql-persistent -n openshift > postgresql-persistent.yaml
+#comment#oc new-app --template=postgresql-persistent --param POSTGRESQL_USER=sonar --param POSTGRESQL_PASSWORD=sonar --param POSTGRESQL_DATABASE=sonar --param VOLUME_CAPACITY=4Gi --labels=app=sonarqube_db
+#comment#oc export template postgresql-persistent -n openshift > postgresql-persistent.yaml
 
 
 #comment#oc new-app --file=../templates/guid-sonarqube/postgresql-persistent.yaml --param POSTGRESQL_USER=sonar --param POSTGRESQL_PASSWORD=sonar --param POSTGRESQL_DATABASE=sonar --param VOLUME_CAPACITY=4Gi --labels=app=sonarqube_db
@@ -53,7 +54,13 @@ echo "Setting up Sonarqube in project $GUID-sonarqube"
 
 oc new-app --file=../templates/guid-sonarqube/postgresql-persistent/postgresql-persistent.yaml --param POSTGRESQL_USER=sonar --param POSTGRESQL_PASSWORD=sonar --param POSTGRESQL_DATABASE=sonar --param VOLUME_CAPACITY=4Gi --labels=app=sonarqube_db -n $GUID-sonarqube
 
-#wait for postgresql to start up
-sleep 40
+while : ; do
+   echo "Checking if postgresql is Ready... For Sonarqube"
+   #oc get pod -n ${GUID}-sonarqube|grep '\-2\-'|grep -v deploy|grep "1/1"
+   oc get pod -n ${GUID}-sonarqube | grep postgresql | grep -v deploy | grep "1/1" | grep Running
+   [[ "$?" == "1" ]] || break
+   echo "...no. Sleeping 10 seconds."
+   sleep 10
+done
 
 sed "s/%GUID%/$GUID/g" ../templates/guid-sonarqube/sonar.yaml | oc create -n $GUID-sonarqube -f -

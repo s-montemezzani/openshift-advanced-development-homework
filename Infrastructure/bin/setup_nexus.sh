@@ -76,8 +76,16 @@ echo "Setting up Nexus in project $GUID-nexus"
 
 sed "s/%GUID%/$GUID/g" ../templates/guid-nexus/nexus.yaml | oc create -n $GUID-nexus -f -
 
-#wait for nexus to start up
-sleep 240
+while : ; do
+   echo "Checking if Nexus is Ready..."
+   #oc get pod -n ${GUID}-nexus |grep '\-2\-'|grep -v deploy|grep "1/1"
+   oc get pod -n ${GUID}-nexus | grep nexus | grep -v deploy | grep "1/1" | grep Running
+   [[ "$?" == "1" ]] || break
+   echo "...no. Sleeping 10 seconds."
+   sleep 10
+done
+
+
 
 #check if the slave pod created by the grading jenkins can curl, write files to current directory, remove at the end, ......
 #cd /tmp

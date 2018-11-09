@@ -21,6 +21,7 @@ oc policy add-role-to-user admin ${USER} -n ${GUID}-jenkins
 oc policy add-role-to-user admin ${USER} -n ${GUID}-parks-dev
 oc policy add-role-to-user admin ${USER} -n ${GUID}-parks-prod
 
+#these don't seem to work when run directly from user simone.montemezzani-avaloq.com => maybe with homewokr user?
 oc annotate namespace ${GUID}-nexus      openshift.io/requester=${USER} --overwrite
 oc annotate namespace ${GUID}-sonarqube  openshift.io/requester=${USER} --overwrite
 oc annotate namespace ${GUID}-jenkins    openshift.io/requester=${USER} --overwrite
