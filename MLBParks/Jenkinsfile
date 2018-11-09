@@ -56,19 +56,21 @@ podTemplate(
             sh "mvn -s ../nexus_settings.xml clean package -Dmaven.test.skip=true"
         }
 
-      parallel {
-          // Using Maven run the unit tests
-          stage('Unit Tests') {
-            echo "Running Unit Tests"
+      stage('Unit tests and Code Analysis') {
+          parallel {
+              // Using Maven run the unit tests
+              stage('Unit Tests') {
+                echo "Running Unit Tests"
 
-            sh "mvn -s ../nexus_settings.xml test"
-          }
+                sh "mvn -s ../nexus_settings.xml test"
+              }
 
-          // Using Maven call SonarQube for Code Analysis
-          stage('Code Analysis') {
-            echo "Running Code Analysis"
+              // Using Maven call SonarQube for Code Analysis
+              stage('Code Analysis') {
+                echo "Running Code Analysis"
 
-            sh "mvn -s ../nexus_settings.xml sonar:sonar -Dsonar.host.url=http://sonarqube.${GUID}.svc.cluster.local:9000 -Dsonar.projectName=${JOB_BASE_NAME}-${devTag}"
+                sh "mvn -s ../nexus_settings.xml sonar:sonar -Dsonar.host.url=http://sonarqube.${GUID}.svc.cluster.local:9000 -Dsonar.projectName=${JOB_BASE_NAME}-${devTag}"
+              }
           }
       }
 
