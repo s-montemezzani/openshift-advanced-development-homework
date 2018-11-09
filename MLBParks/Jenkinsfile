@@ -82,8 +82,6 @@ podTemplate(
       stage('Build and Tag OpenShift Image') {
         echo "Building OpenShift container image tasks:${devTag}"
 
-        sh "ls -lrt ./target/"
-
         sh "oc start-build mlbparks-dev --follow --from-file=./target/mlbparks.war -n ${GUID}-parks-dev"
 
         sh "oc tag mlbparks-dev:latest mlbparks-dev:${devTag} -n ${GUID}-parks-dev"
@@ -118,10 +116,9 @@ podTemplate(
            echo "Checking if latest rollout of mlbparks-dev is Ready... "
            //sh "oc get pod -n ${GUID}-parks-dev | grep mlbparks-dev | grep -v deploy | grep '1/1' | grep Running"
 
-           def String returnString = sh(script: "oc get pod -n ${GUID}-parks-dev | grep mlbparks-dev | grep -v deploy | grep '1/1' | grep Running", returnStdout:true)
-           echo "returnString is ${returnString}"
-           if (returnString.length() > 1) break;
-           echo "...no. Sleeping 10 seconds."
+           int returnCode = sh(script: "oc get pod -n ${GUID}-parks-dev | grep mlbparks-dev | grep -v deploy | grep '1/1' | grep Running", returnStatus::true)
+           if (returnCode == 0) break;
+           echo "...no (returnCode is ${returnCode}). Sleeping 10 seconds."
            sleep 10
         }
         /*
