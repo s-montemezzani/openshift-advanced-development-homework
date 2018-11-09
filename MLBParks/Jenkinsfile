@@ -55,6 +55,9 @@ podTemplate(
 
             sh "mvn -s ../nexus_settings.xml clean package -Dmaven.test.skip=true"
         }
+      stage('test') {
+        echo "test"
+      }
 
       stage('Unit tests and Code Analysis') {
           parallel {
