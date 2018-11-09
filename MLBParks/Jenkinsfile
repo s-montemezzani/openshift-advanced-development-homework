@@ -115,13 +115,16 @@ podTemplate(
         sh "oc rollout latest mlbparks-dev -n ${GUID}-parks-dev"
 
         //alternative to openshiftVerifyDeployment
-        while : ; do
+        while (true) {
            echo "Checking if latest rollout of mlbparks-dev is Ready... "
-           sh "oc get pod -n ${GUID}-parks-dev | grep mlbparks-dev | grep -v deploy | grep '1/1' | grep Running"
-           [[ "$?" == "1" ]] || break
+           //sh "oc get pod -n ${GUID}-parks-dev | grep mlbparks-dev | grep -v deploy | grep '1/1' | grep Running"
+
+           def String returnString = sh(script: "oc get pod -n ${GUID}-parks-dev | grep mlbparks-dev | grep -v deploy | grep '1/1' | grep Running", returnStdout:true)
+           echo "returnString is ${returnString}"
+           if (returnString.length() > 1) break;
            echo "...no. Sleeping 10 seconds."
            sleep 10
-        done
+        }
         /*
         // Deploy the development application.
         // Replace mons-tasks-dev with the name of your production project
