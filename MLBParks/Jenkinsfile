@@ -17,164 +17,165 @@ podTemplate(
         node('skopeo-pod')
       }
     stages {
+        stage('head stage for all pipeline stuff') {
+            echo "GUID: ${GUID}"
+            echo "CLUSTER: ${CLUSTER}"
+            echo "REPO: ${REPO}"
 
-        echo "GUID: ${GUID}"
-        echo "CLUSTER: ${CLUSTER}"
-        echo "REPO: ${REPO}"
+            // Your Pipeline Code goes here. Make sure to use the ${GUID} and ${CLUSTER} parameters where appropriate
+            // You need to build the application in directory `MLBParks`.
+            // Also copy "../nexus_settings.xml" to your build directory
+            // and replace 'GUID' in the file with your ${GUID} to point to >your< Nexus instance
 
-        // Your Pipeline Code goes here. Make sure to use the ${GUID} and ${CLUSTER} parameters where appropriate
-        // You need to build the application in directory `MLBParks`.
-        // Also copy "../nexus_settings.xml" to your build directory
-        // and replace 'GUID' in the file with your ${GUID} to point to >your< Nexus instance
-
-        stage('Checkout Source') {
-          git url: '$REPO'
-        }
-
-
-        // The following variables need to be defined at the top level
-        // and not inside the scope of a stage - otherwise they would not
-        // be accessible from other stages.
-        // Extract version and other properties from the pom.xml
-        def groupId    = getGroupIdFromPom("pom.xml")
-        def artifactId = getArtifactIdFromPom("pom.xml")
-        def version    = getVersionFromPom("pom.xml")
-        // Set the tag for the development image: version + build number
-        def devTag  = "${version}-${BUILD_NUMBER}"
-        // Set the tag for the production image: version
-        def prodTag = "${version}"
-        echo "devTag = ${devTag}"
-        echo "prodTag = ${prodTag}"
-
-        dir('MLBParks') {
-
-            stage('Modifying maven_settings.xml') {
-                sh "sed -i 's/%GUID%/${GUID}/g' ../nexus_settings.xml"
+            stage('Checkout Source') {
+              git url: '$REPO'
             }
 
 
-            // Using Maven build the war file
-            // Do not run tests in this step
-            stage('Build war') {
-                echo "Building version ${version}"
+            // The following variables need to be defined at the top level
+            // and not inside the scope of a stage - otherwise they would not
+            // be accessible from other stages.
+            // Extract version and other properties from the pom.xml
+            def groupId    = getGroupIdFromPom("pom.xml")
+            def artifactId = getArtifactIdFromPom("pom.xml")
+            def version    = getVersionFromPom("pom.xml")
+            // Set the tag for the development image: version + build number
+            def devTag  = "${version}-${BUILD_NUMBER}"
+            // Set the tag for the production image: version
+            def prodTag = "${version}"
+            echo "devTag = ${devTag}"
+            echo "prodTag = ${prodTag}"
 
-                sh "mvn -s ../nexus_settings.xml clean package -Dmaven.test.skip=true"
-            }
-          stage('test') {
-            echo "test"
-          }
+            dir('MLBParks') {
 
-          stage('Unit tests and Code Analysis') {
-              parallel {
-                  // Using Maven run the unit tests
-                  stage('Unit Tests') {
-                    echo "Running Unit Tests"
+                stage('Modifying maven_settings.xml') {
+                    sh "sed -i 's/%GUID%/${GUID}/g' ../nexus_settings.xml"
+                }
 
-                    sh "mvn -s ../nexus_settings.xml test"
-                  }
 
-                  // Using Maven call SonarQube for Code Analysis
-                  stage('Code Analysis') {
-                    echo "Running Code Analysis"
+                // Using Maven build the war file
+                // Do not run tests in this step
+                stage('Build war') {
+                    echo "Building version ${version}"
 
-                    sh "mvn -s ../nexus_settings.xml sonar:sonar -Dsonar.host.url=http://sonarqube.${GUID}.svc.cluster.local:9000 -Dsonar.projectName=${JOB_BASE_NAME}-${devTag}"
+                    sh "mvn -s ../nexus_settings.xml clean package -Dmaven.test.skip=true"
+                }
+              stage('test') {
+                echo "test"
+              }
+
+              stage('Unit tests and Code Analysis') {
+                  parallel {
+                      // Using Maven run the unit tests
+                      stage('Unit Tests') {
+                        echo "Running Unit Tests"
+
+                        sh "mvn -s ../nexus_settings.xml test"
+                      }
+
+                      // Using Maven call SonarQube for Code Analysis
+                      stage('Code Analysis') {
+                        echo "Running Code Analysis"
+
+                        sh "mvn -s ../nexus_settings.xml sonar:sonar -Dsonar.host.url=http://sonarqube.${GUID}.svc.cluster.local:9000 -Dsonar.projectName=${JOB_BASE_NAME}-${devTag}"
+                      }
                   }
               }
-          }
 
-          // Publish the built war file to Nexus
-          stage('Publish to Nexus') {
-            echo "Publish to Nexus"
+              // Publish the built war file to Nexus
+              stage('Publish to Nexus') {
+                echo "Publish to Nexus"
 
-            sh "mvn -s ../nexus_settings.xml deploy -DskipTests=true -DaltDeploymentRepository=nexus::default::http://nexus3.${GUID}-nexus.svc.cluster.local:8081/repository/releases"
-          }
+                sh "mvn -s ../nexus_settings.xml deploy -DskipTests=true -DaltDeploymentRepository=nexus::default::http://nexus3.${GUID}-nexus.svc.cluster.local:8081/repository/releases"
+              }
 
-          // Build the OpenShift Image in OpenShift and tag it.
-          stage('Build and Tag OpenShift Image') {
-            echo "Building OpenShift container image tasks:${devTag}"
+              // Build the OpenShift Image in OpenShift and tag it.
+              stage('Build and Tag OpenShift Image') {
+                echo "Building OpenShift container image tasks:${devTag}"
 
-            sh "ls -lrt ./target/"
+                sh "ls -lrt ./target/"
 
-            sh "oc start-build mlbparks-dev --follow --from-file=./target/mlbparks.war -n ${GUID}-parks-dev"
+                sh "oc start-build mlbparks-dev --follow --from-file=./target/mlbparks.war -n ${GUID}-parks-dev"
 
-            sh "oc tag mlbparks-dev:latest mlbparks-dev:${devTag} -n ${GUID}-parks-dev"
+                sh "oc tag mlbparks-dev:latest mlbparks-dev:${devTag} -n ${GUID}-parks-dev"
 
-            /*
-            openshiftVerifyBuild bldCfg: 'tasks', checkForTriggeredDeployments: 'false',
-                                 namespace: 'mons-tasks-dev', verbose: 'false', waitTime: ''
+                /*
+                openshiftVerifyBuild bldCfg: 'tasks', checkForTriggeredDeployments: 'false',
+                                     namespace: 'mons-tasks-dev', verbose: 'false', waitTime: ''
 
-            //just does some oc get builds into greps...
-            //https://github.com/openshift/jenkins-plugin
+                //just does some oc get builds into greps...
+                //https://github.com/openshift/jenkins-plugin
 
+                */
+
+                /*
+                openshiftTag alias: 'false',
+                destStream: 'tasks', destTag: devTag,
+                             destinationNamespace: 'mons-tasks-dev', namespace: 'mons-tasks-dev',
+                             srcStream: 'tasks', srcTag: 'latest', verbose: 'false'
+                */
+
+              }
+
+              // Deploy the built image to the Development Environment.
+              stage('Deploy to Dev') {
+                echo "Deploying container image to Development Project"
+
+                sh "oc set image dc/mlbparks-dev mlbparks-dev=docker-registry.default.svc:5000/${GUID}-parks-dev/mlbparks-dev:${devTag} -n ${GUID}-parks-dev"
+                sh "oc rollout latest mlbparks-dev -n ${GUID}-parks-dev"
+
+                //alternative to openshiftVerifyDeployment
+                while (true) {
+                   echo "Checking if latest rollout of mlbparks-dev is Ready... "
+                   //sh "oc get pod -n ${GUID}-parks-dev | grep mlbparks-dev | grep -v deploy | grep '1/1' | grep Running"
+
+                   def String returnString = sh(script: "oc get pod -n ${GUID}-parks-dev | grep mlbparks-dev | grep -v deploy | grep '1/1' | grep Running", returnStdout:true)
+                   echo "returnString is ${returnString}"
+                   if (returnString.length() > 1) {
+                        break
+                   }
+                   echo "...no. Sleeping 10 seconds."
+                   sleep 10
+                }
+                /*
+                // Deploy the development application.
+                // Replace mons-tasks-dev with the name of your production project
+
+                openshiftDeploy depCfg: 'tasks', namespace: 'mons-tasks-dev', verbose: 'false', waitTime: '', waitUnit: 'sec'
+                openshiftVerifyDeployment depCfg: 'tasks', namespace: 'mons-tasks-dev', replicaCount: '1', verbose: 'false', verifyReplicaCount: 'false', waitTime: '', waitUnit: 'sec'
+                openshiftVerifyService namespace: 'mons-tasks-dev', svcName: 'tasks', verbose: 'false'
             */
 
-            /*
-            openshiftTag alias: 'false',
-            destStream: 'tasks', destTag: devTag,
-                         destinationNamespace: 'mons-tasks-dev', namespace: 'mons-tasks-dev',
-                         srcStream: 'tasks', srcTag: 'latest', verbose: 'false'
-            */
 
-          }
+              }
 
-          // Deploy the built image to the Development Environment.
-          stage('Deploy to Dev') {
-            echo "Deploying container image to Development Project"
+              // Run Integration Tests in the Development Environment.
+              stage('Integration Tests') {
+                echo "Running Integration Tests"
+                // TBD
+              }
 
-            sh "oc set image dc/mlbparks-dev mlbparks-dev=docker-registry.default.svc:5000/${GUID}-parks-dev/mlbparks-dev:${devTag} -n ${GUID}-parks-dev"
-            sh "oc rollout latest mlbparks-dev -n ${GUID}-parks-dev"
+              // Copy Image to Nexus Docker Registry
+              stage('Copy Image to Nexus Docker Registry') {
+                echo "Copy image to Nexus Docker Registry"
+                // TBD
+              }
 
-            //alternative to openshiftVerifyDeployment
-            while (true) {
-               echo "Checking if latest rollout of mlbparks-dev is Ready... "
-               //sh "oc get pod -n ${GUID}-parks-dev | grep mlbparks-dev | grep -v deploy | grep '1/1' | grep Running"
+              // Blue/Green Deployment into Production
+              // -------------------------------------
+              // Do not activate the new version yet.
+              def destApp   = "tasks-green"
+              def activeApp = ""
 
-               def String returnString = sh(script: "oc get pod -n ${GUID}-parks-dev | grep mlbparks-dev | grep -v deploy | grep '1/1' | grep Running", returnStdout:true)
-               echo "returnString is ${returnString}"
-               if (returnString.length() > 1) {
-                    break
-               }
-               echo "...no. Sleeping 10 seconds."
-               sleep 10
-            }
-            /*
-            // Deploy the development application.
-            // Replace mons-tasks-dev with the name of your production project
+              stage('Blue/Green Production Deployment') {
+                // TBD
+              }
 
-            openshiftDeploy depCfg: 'tasks', namespace: 'mons-tasks-dev', verbose: 'false', waitTime: '', waitUnit: 'sec'
-            openshiftVerifyDeployment depCfg: 'tasks', namespace: 'mons-tasks-dev', replicaCount: '1', verbose: 'false', verifyReplicaCount: 'false', waitTime: '', waitUnit: 'sec'
-            openshiftVerifyService namespace: 'mons-tasks-dev', svcName: 'tasks', verbose: 'false'
-        */
-
-
-          }
-
-          // Run Integration Tests in the Development Environment.
-          stage('Integration Tests') {
-            echo "Running Integration Tests"
-            // TBD
-          }
-
-          // Copy Image to Nexus Docker Registry
-          stage('Copy Image to Nexus Docker Registry') {
-            echo "Copy image to Nexus Docker Registry"
-            // TBD
-          }
-
-          // Blue/Green Deployment into Production
-          // -------------------------------------
-          // Do not activate the new version yet.
-          def destApp   = "tasks-green"
-          def activeApp = ""
-
-          stage('Blue/Green Production Deployment') {
-            // TBD
-          }
-
-          stage('Switch over to new Version') {
-            // TBD
-            echo "Switching Production application to ${destApp}."
-            // TBD
+              stage('Switch over to new Version') {
+                // TBD
+                echo "Switching Production application to ${destApp}."
+                // TBD
+              }
           }
         }
       }
