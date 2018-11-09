@@ -116,7 +116,7 @@ podTemplate(
            echo "Checking if latest rollout of mlbparks-dev is Ready... "
            //sh "oc get pod -n ${GUID}-parks-dev | grep mlbparks-dev | grep -v deploy | grep '1/1' | grep Running"
 
-           int returnCode = sh(script: "oc get pod -n ${GUID}-parks-dev | grep mlbparks-dev | grep -v deploy | grep '1/1' | grep Running", returnStatus::true)
+           int returnCode = sh(script: "oc get pod -n ${GUID}-parks-dev | grep mlbparks-dev | grep -v deploy | grep '1/1' | grep Running", returnStatus:true)
            if (returnCode == 0) break;
            echo "...no (returnCode is ${returnCode}). Sleeping 10 seconds."
            sleep 10
