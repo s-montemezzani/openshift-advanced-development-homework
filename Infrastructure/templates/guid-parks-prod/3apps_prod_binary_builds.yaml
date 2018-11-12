@@ -1,0 +1,1175 @@
+apiVersion: v1
+items:
+#green deploymentconfigs
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    generation: 1
+    labels:
+      app: mlbparks-green
+    name: mlbparks-green
+  spec:
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      app: mlbparks-green
+      deploymentconfig: mlbparks-green
+    strategy:
+      activeDeadlineSeconds: 21600
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        post:
+          execNewPod:
+            command:
+            - curl
+            - mlbparks-green.%GUID%-parks-prod.svc.cluster.local:8080/ws/data/load/
+            containerName: mlbparks-green
+          failurePolicy: Abort
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        annotations:
+          openshift.io/generated-by: OpenShiftNewApp
+        creationTimestamp: null
+        labels:
+          app: mlbparks-green
+          deploymentconfig: mlbparks-green
+      spec:
+        containers:
+        - env:
+          - name: DB_NAME
+            valueFrom:
+              configMapKeyRef:
+                key: DB_NAME
+                name: mlbparks-green-configmap
+          - name: DB_PASSWORD
+            valueFrom:
+              configMapKeyRef:
+                key: DB_PASSWORD
+                name: mlbparks-green-configmap
+          - name: DB_PORT
+            valueFrom:
+              configMapKeyRef:
+                key: DB_PORT
+                name: mlbparks-green-configmap
+          - name: DB_USERNAME
+            valueFrom:
+              configMapKeyRef:
+                key: DB_USERNAME
+                name: mlbparks-green-configmap
+          - name: APPNAME
+            valueFrom:
+              configMapKeyRef:
+                key: APPNAME
+                name: mlbparks-green-configmap
+          - name: DB_HOST
+            valueFrom:
+              configMapKeyRef:
+                key: DB_HOST
+                name: mlbparks-green-configmap
+          image: docker-registry.default.svc:5000/%GUID%-parks-green/mlbparks-green:0.0-0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /ws/healthz
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: mlbparks-green
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /ws/healthz
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+    test: false
+    triggers: []
+  status:
+    availableReplicas: 0
+    latestVersion: 0
+    observedGeneration: 0
+    replicas: 0
+    unavailableReplicas: 0
+    updatedReplicas: 0
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    generation: 1
+    labels:
+      app: nationalparks-green
+    name: nationalparks-green
+  spec:
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      app: nationalparks-green
+      deploymentconfig: nationalparks-green
+    strategy:
+      activeDeadlineSeconds: 21600
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        post:
+          execNewPod:
+            command:
+            - curl
+            - nationalparks-green.%GUID%-parks-prod.svc.cluster.local:8080/ws/data/load/
+            containerName: nationalparks-dev
+          failurePolicy: Abort
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        annotations:
+          openshift.io/generated-by: OpenShiftNewApp
+        creationTimestamp: null
+        labels:
+          app: nationalparks-green
+          deploymentconfig: nationalparks-green
+      spec:
+        containers:
+        - env:
+          - name: DB_PASSWORD
+            valueFrom:
+              configMapKeyRef:
+                key: DB_PASSWORD
+                name: nationalparks-green-configmap
+          - name: DB_PORT
+            valueFrom:
+              configMapKeyRef:
+                key: DB_PORT
+                name: nationalparks-green-configmap
+          - name: DB_USERNAME
+            valueFrom:
+              configMapKeyRef:
+                key: DB_USERNAME
+                name: nationalparks-green-configmap
+          - name: APPNAME
+            valueFrom:
+              configMapKeyRef:
+                key: APPNAME
+                name: nationalparks-green-configmap
+          - name: DB_HOST
+            valueFrom:
+              configMapKeyRef:
+                key: DB_HOST
+                name: nationalparks-green-configmap
+          - name: DB_NAME
+            valueFrom:
+              configMapKeyRef:
+                key: DB_NAME
+                name: nationalparks-green-configmap
+          image: docker-registry.default.svc:5000/%GUID%-parks-prod/nationalparks-green:0.0-0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /ws/healthz
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: nationalparks-green
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /ws/healthz
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+    test: false
+    triggers: []
+  status:
+    availableReplicas: 0
+    latestVersion: 0
+    observedGeneration: 0
+    replicas: 0
+    unavailableReplicas: 0
+    updatedReplicas: 0
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    generation: 1
+    labels:
+      app: parksmap-green
+    name: parksmap-green
+  spec:
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      app: parksmap-green
+      deploymentconfig: parksmap-green
+    strategy:
+      activeDeadlineSeconds: 21600
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        annotations:
+          openshift.io/generated-by: OpenShiftNewApp
+        creationTimestamp: null
+        labels:
+          app: parksmap-green
+          deploymentconfig: parksmap-green
+      spec:
+        containers:
+        - env:
+          - name: DB_HOST
+            valueFrom:
+              configMapKeyRef:
+                key: DB_HOST
+                name: parksmap-green-configmap
+          - name: DB_NAME
+            valueFrom:
+              configMapKeyRef:
+                key: DB_NAME
+                name: parksmap-green-configmap
+          - name: DB_PASSWORD
+            valueFrom:
+              configMapKeyRef:
+                key: DB_PASSWORD
+                name: parksmap-green-configmap
+          - name: DB_PORT
+            valueFrom:
+              configMapKeyRef:
+                key: DB_PORT
+                name: parksmap-green-configmap
+          - name: DB_USERNAME
+            valueFrom:
+              configMapKeyRef:
+                key: DB_USERNAME
+                name: parksmap-green-configmap
+          - name: APPNAME
+            valueFrom:
+              configMapKeyRef:
+                key: APPNAME
+                name: parksmap-green-configmap
+          image: docker-registry.default.svc:5000/%GUID%-parks-prod/parksmap-green:0.0-0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /ws/healthz
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: parksmap-green
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /ws/healthz
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+    test: false
+    triggers: []
+  status:
+    availableReplicas: 0
+    latestVersion: 0
+    observedGeneration: 0
+    replicas: 0
+    unavailableReplicas: 0
+    updatedReplicas: 0
+
+#blue deploymentconfigs
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    generation: 1
+    labels:
+      app: mlbparks-blue
+    name: mlbparks-blue
+  spec:
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      app: mlbparks-blue
+      deploymentconfig: mlbparks-blue
+    strategy:
+      activeDeadlineSeconds: 21600
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        post:
+          execNewPod:
+            command:
+            - curl
+            - mlbparks-blue.%GUID%-parks-prod.svc.cluster.local:8080/ws/data/load/
+            containerName: mlbparks-blue
+          failurePolicy: Abort
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        annotations:
+          openshift.io/generated-by: OpenShiftNewApp
+        creationTimestamp: null
+        labels:
+          app: mlbparks-blue
+          deploymentconfig: mlbparks-blue
+      spec:
+        containers:
+        - env:
+          - name: DB_NAME
+            valueFrom:
+              configMapKeyRef:
+                key: DB_NAME
+                name: mlbparks-blue-configmap
+          - name: DB_PASSWORD
+            valueFrom:
+              configMapKeyRef:
+                key: DB_PASSWORD
+                name: mlbparks-blue-configmap
+          - name: DB_PORT
+            valueFrom:
+              configMapKeyRef:
+                key: DB_PORT
+                name: mlbparks-blue-configmap
+          - name: DB_USERNAME
+            valueFrom:
+              configMapKeyRef:
+                key: DB_USERNAME
+                name: mlbparks-blue-configmap
+          - name: APPNAME
+            valueFrom:
+              configMapKeyRef:
+                key: APPNAME
+                name: mlbparks-blue-configmap
+          - name: DB_HOST
+            valueFrom:
+              configMapKeyRef:
+                key: DB_HOST
+                name: mlbparks-blue-configmap
+          image: docker-registry.default.svc:5000/%GUID%-parks-prod/mlbparks-blue:0.0-0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /ws/healthz
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: mlbparks-blue
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /ws/healthz
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+    test: false
+    triggers: []
+  status:
+    availableReplicas: 0
+    latestVersion: 0
+    observedGeneration: 0
+    replicas: 0
+    unavailableReplicas: 0
+    updatedReplicas: 0
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    generation: 1
+    labels:
+      app: nationalparks-blue
+    name: nationalparks-blue
+  spec:
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      app: nationalparks-blue
+      deploymentconfig: nationalparks-blue
+    strategy:
+      activeDeadlineSeconds: 21600
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        post:
+          execNewPod:
+            command:
+            - curl
+            - nationalparks-blue.%GUID%-parks-prod.svc.cluster.local:8080/ws/data/load/
+            containerName: nationalparks-blue
+          failurePolicy: Abort
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        annotations:
+          openshift.io/generated-by: OpenShiftNewApp
+        creationTimestamp: null
+        labels:
+          app: nationalparks-blue
+          deploymentconfig: nationalparks-blue
+      spec:
+        containers:
+        - env:
+          - name: DB_PASSWORD
+            valueFrom:
+              configMapKeyRef:
+                key: DB_PASSWORD
+                name: nationalparks-blue-configmap
+          - name: DB_PORT
+            valueFrom:
+              configMapKeyRef:
+                key: DB_PORT
+                name: nationalparks-blue-configmap
+          - name: DB_USERNAME
+            valueFrom:
+              configMapKeyRef:
+                key: DB_USERNAME
+                name: nationalparks-blue-configmap
+          - name: APPNAME
+            valueFrom:
+              configMapKeyRef:
+                key: APPNAME
+                name: nationalparks-blue-configmap
+          - name: DB_HOST
+            valueFrom:
+              configMapKeyRef:
+                key: DB_HOST
+                name: nationalparks-blue-configmap
+          - name: DB_NAME
+            valueFrom:
+              configMapKeyRef:
+                key: DB_NAME
+                name: nationalparks-blue-configmap
+          image: docker-registry.default.svc:5000/%GUID%-parks-prod/nationalparks-blue:0.0-0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /ws/healthz
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: nationalparks-blue
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /ws/healthz
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+    test: false
+    triggers: []
+  status:
+    availableReplicas: 0
+    latestVersion: 0
+    observedGeneration: 0
+    replicas: 0
+    unavailableReplicas: 0
+    updatedReplicas: 0
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewApp
+    creationTimestamp: null
+    generation: 1
+    labels:
+      app: parksmap-blue
+    name: parksmap-blue
+  spec:
+    replicas: 1
+    revisionHistoryLimit: 10
+    selector:
+      app: parksmap-blue
+      deploymentconfig: parksmap-blue
+    strategy:
+      activeDeadlineSeconds: 21600
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        annotations:
+          openshift.io/generated-by: OpenShiftNewApp
+        creationTimestamp: null
+        labels:
+          app: parksmap-blue
+          deploymentconfig: parksmap-blue
+      spec:
+        containers:
+        - env:
+          - name: DB_HOST
+            valueFrom:
+              configMapKeyRef:
+                key: DB_HOST
+                name: parksmap-blue-configmap
+          - name: DB_NAME
+            valueFrom:
+              configMapKeyRef:
+                key: DB_NAME
+                name: parksmap-blue-configmap
+          - name: DB_PASSWORD
+            valueFrom:
+              configMapKeyRef:
+                key: DB_PASSWORD
+                name: parksmap-blue-configmap
+          - name: DB_PORT
+            valueFrom:
+              configMapKeyRef:
+                key: DB_PORT
+                name: parksmap-blue-configmap
+          - name: DB_USERNAME
+            valueFrom:
+              configMapKeyRef:
+                key: DB_USERNAME
+                name: parksmap-blue-configmap
+          - name: APPNAME
+            valueFrom:
+              configMapKeyRef:
+                key: APPNAME
+                name: parksmap-blue-configmap
+          image: docker-registry.default.svc:5000/%GUID%-parks-prod/parksmap-blue:0.0-0
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /ws/healthz
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: parksmap-blue
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /ws/healthz
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+    test: false
+    triggers: []
+  status:
+    availableReplicas: 0
+    latestVersion: 0
+    observedGeneration: 0
+    replicas: 0
+    unavailableReplicas: 0
+    updatedReplicas: 0
+
+#green services
+- apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: null
+    labels:
+      app: mlbparks-green
+      type: parksmap-backend
+    name: mlbparks-green
+  spec:
+    ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      app: mlbparks-green
+      deploymentconfig: mlbparks-green
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: null
+    labels:
+      app: nationalparks-green
+      type: parksmap-backend
+    name: nationalparks-green
+  spec:
+    ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      app: nationalparks-green
+      deploymentconfig: nationalparks-green
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+
+#blue services
+- apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: null
+    labels:
+      app: mlbparks-blue
+      type: parksmap-backend
+    name: mlbparks-blue
+  spec:
+    ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      app: mlbparks-blue
+      deploymentconfig: mlbparks-blue
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: null
+    labels:
+      app: nationalparks-blue
+      type: parksmap-backend
+    name: nationalparks-blue
+  spec:
+    ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      app: nationalparks-blue
+      deploymentconfig: nationalparks-blue
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+
+#green builconfigs
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewBuild
+    creationTimestamp: null
+    labels:
+      build: mlbparks-green
+    name: mlbparks-green
+  spec:
+    failedBuildsHistoryLimit: 5
+    nodeSelector: null
+    output:
+      to:
+        kind: ImageStreamTag
+        name: mlbparks-green:latest
+    postCommit: {}
+    resources: {}
+    runPolicy: Serial
+    source:
+      binary: {}
+      type: Binary
+    strategy:
+      sourceStrategy:
+        from:
+          kind: ImageStreamTag
+          name: jboss-eap70-openshift:1.7
+          namespace: openshift
+      type: Source
+    successfulBuildsHistoryLimit: 5
+    triggers:
+    - github:
+        secret: vTS5SIZ5OeSK7e_6CAbv
+      type: GitHub
+    - generic:
+        secret: cdR2teA5VCEEu7hZOMG6
+      type: Generic
+  status:
+    lastVersion: 0
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewBuild
+    creationTimestamp: null
+    labels:
+      build: nationalparks-green
+    name: nationalparks-green
+  spec:
+    failedBuildsHistoryLimit: 5
+    nodeSelector: null
+    output:
+      to:
+        kind: ImageStreamTag
+        name: nationalparks-green:latest
+    postCommit: {}
+    resources: {}
+    runPolicy: Serial
+    source:
+      binary: {}
+      type: Binary
+    strategy:
+      sourceStrategy:
+        from:
+          kind: ImageStreamTag
+          name: redhat-openjdk18-openshift:1.2
+          namespace: openshift
+      type: Source
+    successfulBuildsHistoryLimit: 5
+    triggers:
+    - github:
+        secret: rmWW9gXJx37XcrHERw_K
+      type: GitHub
+    - generic:
+        secret: t_9chSRhUqCQ704rJM24
+      type: Generic
+  status:
+    lastVersion: 0
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewBuild
+    creationTimestamp: null
+    labels:
+      build: parksmap-green
+    name: parksmap-green
+  spec:
+    failedBuildsHistoryLimit: 5
+    nodeSelector: null
+    output:
+      to:
+        kind: ImageStreamTag
+        name: parksmap-green:latest
+    postCommit: {}
+    resources: {}
+    runPolicy: Serial
+    source:
+      binary: {}
+      type: Binary
+    strategy:
+      sourceStrategy:
+        from:
+          kind: ImageStreamTag
+          name: redhat-openjdk18-openshift:1.2
+          namespace: openshift
+      type: Source
+    successfulBuildsHistoryLimit: 5
+    triggers:
+    - github:
+        secret: kJjOTMkchwy8TLBMkGhv
+      type: GitHub
+    - generic:
+        secret: f46kHB8sajngQIeQDzXX
+      type: Generic
+  status:
+    lastVersion: 0
+
+#blue builconfigs
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewBuild
+    creationTimestamp: null
+    labels:
+      build: mlbparks-blue
+    name: mlbparks-blue
+  spec:
+    failedBuildsHistoryLimit: 5
+    nodeSelector: null
+    output:
+      to:
+        kind: ImageStreamTag
+        name: mlbparks-blue:latest
+    postCommit: {}
+    resources: {}
+    runPolicy: Serial
+    source:
+      binary: {}
+      type: Binary
+    strategy:
+      sourceStrategy:
+        from:
+          kind: ImageStreamTag
+          name: jboss-eap70-openshift:1.7
+          namespace: openshift
+      type: Source
+    successfulBuildsHistoryLimit: 5
+    triggers:
+    - github:
+        secret: vTS5SIZ5OeSK7e_6CAbv
+      type: GitHub
+    - generic:
+        secret: cdR2teA5VCEEu7hZOMG6
+      type: Generic
+  status:
+    lastVersion: 0
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewBuild
+    creationTimestamp: null
+    labels:
+      build: nationalparks-blue
+    name: nationalparks-blue
+  spec:
+    failedBuildsHistoryLimit: 5
+    nodeSelector: null
+    output:
+      to:
+        kind: ImageStreamTag
+        name: nationalparks-blue:latest
+    postCommit: {}
+    resources: {}
+    runPolicy: Serial
+    source:
+      binary: {}
+      type: Binary
+    strategy:
+      sourceStrategy:
+        from:
+          kind: ImageStreamTag
+          name: redhat-openjdk18-openshift:1.2
+          namespace: openshift
+      type: Source
+    successfulBuildsHistoryLimit: 5
+    triggers:
+    - github:
+        secret: rmWW9gXJx37XcrHERw_K
+      type: GitHub
+    - generic:
+        secret: t_9chSRhUqCQ704rJM24
+      type: Generic
+  status:
+    lastVersion: 0
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewBuild
+    creationTimestamp: null
+    labels:
+      build: parksmap-blue
+    name: parksmap-blue
+  spec:
+    failedBuildsHistoryLimit: 5
+    nodeSelector: null
+    output:
+      to:
+        kind: ImageStreamTag
+        name: parksmap-blue:latest
+    postCommit: {}
+    resources: {}
+    runPolicy: Serial
+    source:
+      binary: {}
+      type: Binary
+    strategy:
+      sourceStrategy:
+        from:
+          kind: ImageStreamTag
+          name: redhat-openjdk18-openshift:1.2
+          namespace: openshift
+      type: Source
+    successfulBuildsHistoryLimit: 5
+    triggers:
+    - github:
+        secret: kJjOTMkchwy8TLBMkGhv
+      type: GitHub
+    - generic:
+        secret: f46kHB8sajngQIeQDzXX
+      type: Generic
+  status:
+    lastVersion: 0
+
+#green imagestreams
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewBuild
+      openshift.io/image.dockerRepositoryCheck: 2018-10-26T05:38:08Z
+    creationTimestamp: null
+    generation: 3
+    labels:
+      build: mlbparks-green
+    name: mlbparks-green
+  spec:
+    lookupPolicy:
+      local: false
+  status:
+    dockerImageRepository: ""
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewBuild
+      openshift.io/image.dockerRepositoryCheck: 2018-10-26T05:38:09Z
+    creationTimestamp: null
+    generation: 3
+    labels:
+      build: nationalparks-green
+    name: nationalparks-green
+  spec:
+    lookupPolicy:
+      local: false
+  status:
+    dockerImageRepository: ""
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewBuild
+      openshift.io/image.dockerRepositoryCheck: 2018-10-26T05:37:04Z
+    creationTimestamp: null
+    generation: 3
+    labels:
+      build: parksmap-green
+    name: parksmap-green
+  spec:
+    lookupPolicy:
+      local: false
+  status:
+    dockerImageRepository: ""
+
+#blue imagestreams
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewBuild
+      openshift.io/image.dockerRepositoryCheck: 2018-10-26T05:38:08Z
+    creationTimestamp: null
+    generation: 3
+    labels:
+      build: mlbparks-blue
+    name: mlbparks-blue
+  spec:
+    lookupPolicy:
+      local: false
+  status:
+    dockerImageRepository: ""
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewBuild
+      openshift.io/image.dockerRepositoryCheck: 2018-10-26T05:38:09Z
+    creationTimestamp: null
+    generation: 3
+    labels:
+      build: nationalparks-blue
+    name: nationalparks-blue
+  spec:
+    lookupPolicy:
+      local: false
+  status:
+    dockerImageRepository: ""
+- apiVersion: v1
+  kind: ImageStream
+  metadata:
+    annotations:
+      openshift.io/generated-by: OpenShiftNewBuild
+      openshift.io/image.dockerRepositoryCheck: 2018-10-26T05:37:04Z
+    creationTimestamp: null
+    generation: 3
+    labels:
+      build: parksmap-blue
+    name: parksmap-blue
+  spec:
+    lookupPolicy:
+      local: false
+  status:
+    dockerImageRepository: ""
+
+#green configmaps
+- apiVersion: v1
+  data:
+    APPNAME: MLB Parks (Green)
+    DB_HOST: mongodb
+    DB_NAME: parks
+    DB_PASSWORD: mongodb
+    DB_PORT: "27017"
+    DB_USERNAME: mongodb
+  kind: ConfigMap
+  metadata:
+    creationTimestamp: null
+    name: mlbparks-green-configmap
+- apiVersion: v1
+  data:
+    APPNAME: National Parks (Green)
+    DB_HOST: mongodb
+    DB_NAME: parks
+    DB_PASSWORD: mongodb
+    DB_PORT: "27017"
+    DB_USERNAME: mongodb
+  kind: ConfigMap
+  metadata:
+    creationTimestamp: null
+    name: nationalparks-green-configmap
+- apiVersion: v1
+  data:
+    APPNAME: ParksMap (Green)
+    DB_HOST: mongodb
+    DB_NAME: parks
+    DB_PASSWORD: mongodb
+    DB_PORT: "27017"
+    DB_USERNAME: mongodb
+  kind: ConfigMap
+  metadata:
+    creationTimestamp: null
+    name: parksmap-green-configmap
+
+#blue configmaps
+- apiVersion: v1
+  data:
+    APPNAME: MLB Parks (Blue)
+    DB_HOST: mongodb
+    DB_NAME: parks
+    DB_PASSWORD: mongodb
+    DB_PORT: "27017"
+    DB_USERNAME: mongodb
+  kind: ConfigMap
+  metadata:
+    creationTimestamp: null
+    name: mlbparks-blue-configmap
+- apiVersion: v1
+  data:
+    APPNAME: National Parks (Blue)
+    DB_HOST: mongodb
+    DB_NAME: parks
+    DB_PASSWORD: mongodb
+    DB_PORT: "27017"
+    DB_USERNAME: mongodb
+  kind: ConfigMap
+  metadata:
+    creationTimestamp: null
+    name: nationalparks-blue-configmap
+- apiVersion: v1
+  data:
+    APPNAME: ParksMap (Blue)
+    DB_HOST: mongodb
+    DB_NAME: parks
+    DB_PASSWORD: mongodb
+    DB_PORT: "27017"
+    DB_USERNAME: mongodb
+  kind: ConfigMap
+  metadata:
+    creationTimestamp: null
+    name: parksmap-blue-configmap
+
+#todo route
+kind: List
+metadata: {}

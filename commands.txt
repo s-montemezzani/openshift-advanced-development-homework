@@ -5,3 +5,8 @@ export USER=simone.montemezzani-avaloq.com
 export CLUSTER=https://master.na39.openshift.opentlc.com
 
 ~/Infrastructure/bin/setup_jenkins.sh mons-5c83 repo https://master.na39.openshift.opentlc.com
+
+oc start-build mlbparks-pipeline -n $GUID-jenkins
+
+oc expose mlbparks-dev
+oc rollout latest mlbparks-dev -n ${GUID}-parks-dev

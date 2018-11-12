@@ -121,10 +121,10 @@ oc set probe dc/nationalparks-dev --readiness --failure-threshold 3 --initial-de
 
 #deployment hook only for nationalparks, mlbparks, according to README.adoc
 #test
-oc set deployment-hook --post dc/nationalparks-dev \
--- curl localhost:8080/ws/data/load/
-oc set deployment-hook --post dc/mlbparks-dev \
--- curl localhost:8080/ws/data/load/
+oc set deployment-hook --post dc/nationalparks-dev --failure-policy="abort" -n $GUID-parks-dev \
+-- curl nationalparks-dev.$GUID-parks-dev.svc.cluster.local:8080/ws/data/load/
+oc set deployment-hook --post dc/mlbparks-dev --failure-policy="abort" -n $GUID-parks-dev \
+-- curl mlbparks-dev.$GUID-parks-dev.svc.cluster.local:8080/ws/data/load/
 
 
 oc export dc,bc,is,cm,svc > 3apps_dev_binary_builds.yaml
@@ -151,5 +151,3 @@ Valid values are:
 */
 
 
-oc expose mlbparks-dev
-oc rollout latest mlbparks-dev -n ${GUID}-parks-dev

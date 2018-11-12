@@ -14,91 +14,14 @@ echo "Setting up Parks Production Environment in project ${GUID}-parks-prod"
 
 # To be Implemented by Student
 
+oc policy add-role-to-user edit system:serviceaccount:$GUID-jenkins:jenkins -n $GUID-parks-prod
+oc policy add-role-to-group system:image-puller system:serviceaccounts:$GUID-parks-prod -n $GUID-parks-dev
 
+oc policy add-role-to-user view --serviceaccount=default -n $GUID-parks-dev
 
-echo 'kind: Service
-apiVersion: v1
-metadata:
-  name: "mongodb-internal"
-  labels:
-    name: "mongodb"
-  annotations:
-    service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
-spec:
-  clusterIP: None
-  ports:
-    - name: mongodb
-      port: 27017
-  selector:
-    name: "mongodb"' | oc create -f -
+sed "s/%GUID%/$GUID/g" ../templates/guid-parks-prod/mongodb_prod.yaml | oc create -n $GUID-parks-prod -f -
 
-echo 'kind: Service
-apiVersion: v1
-metadata:
-  name: "mongodb"
-  labels:
-    name: "mongodb"
-spec:
-  ports:
-    - name: mongodb
-      port: 27017
-  selector:
-    name: "mongodb"' | oc create -f -
+sed "s/%GUID%/$GUID/g" ../templates/guid-parks-prod/3apps_prod_binary_builds.yaml | oc create -n $GUID-parks-prod -f -
 
-echo 'kind: StatefulSet
-apiVersion: apps/v1
-metadata:
-  name: "mongodb"
-spec:
-  serviceName: "mongodb-internal"
-  replicas: 3
-  selector:
-    matchLabels:
-      name: mongodb
-  template:
-    metadata:
-      labels:
-        name: "mongodb"
-    spec:
-      containers:
-        - name: mongo-container
-          image: "registry.access.redhat.com/rhscl/mongodb-34-rhel7:latest"
-          ports:
-            - containerPort: 27017
-          args:
-            - "run-mongod-replication"
-          volumeMounts:
-            - name: mongo-data
-              mountPath: "/var/lib/mongodb/data"
-          env:
-            - name: MONGODB_DATABASE
-              value: "mongodb"
-            - name: MONGODB_USER
-              value: "mongodb_user"
-            - name: MONGODB_PASSWORD
-              value: "mongodb_password"
-            - name: MONGODB_ADMIN_PASSWORD
-              value: "mongodb_admin_password"
-            - name: MONGODB_REPLICA_NAME
-              value: "rs0"
-            - name: MONGODB_KEYFILE_VALUE
-              value: "12345678901234567890"
-            - name: MONGODB_SERVICE_NAME
-              value: "mongodb-internal"
-          readinessProbe:
-            exec:
-              command:
-                - stat
-                - /tmp/initialized
-  volumeClaimTemplates:
-    - metadata:
-        name: mongo-data
-        labels:
-          name: "mongodb"
-      spec:
-        accessModes: [ ReadWriteOnce ]
-        resources:
-          requests:
-            storage: "4Gi"' | oc create -f -
-
-oc export svc,statefulset > mongodb.yaml
+oc expose svc/mlbparks-green --name mlbparks-route -n $GUID-parks-prod
+oc expose svc/nationalparks-green --name nationalparks-route -n $GUID-parks-prod

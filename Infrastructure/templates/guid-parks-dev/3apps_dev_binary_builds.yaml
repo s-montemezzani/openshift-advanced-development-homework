@@ -27,7 +27,7 @@ items:
           execNewPod:
             command:
             - curl
-            - mlbparks-dev.mons-5c83-parks-dev.svc.cluster.local:8080/ws/data/load/
+            - mlbparks-dev.%GUID%-parks-dev.svc.cluster.local:8080/ws/data/load/
             containerName: mlbparks-dev
           failurePolicy: Abort
         timeoutSeconds: 600
@@ -141,7 +141,7 @@ items:
           execNewPod:
             command:
             - curl
-            - nationalparks-dev.mons-5c83-parks-dev.svc.cluster.local:8080/ws/data/load/
+            - nationalparks-dev.%GUID%-parks-dev.svc.cluster.local:8080/ws/data/load/
             containerName: nationalparks-dev
           failurePolicy: Abort
         timeoutSeconds: 600
@@ -188,7 +188,7 @@ items:
               configMapKeyRef:
                 key: DB_NAME
                 name: nationalparks-dev-configmap
-          image: docker-registry.default.svc:5000/%REPO%-parks-dev/nationalparks-dev:0.0-0
+          image: docker-registry.default.svc:5000/%GUID%-parks-dev/nationalparks-dev:0.0-0
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 3
@@ -295,7 +295,7 @@ items:
               configMapKeyRef:
                 key: APPNAME
                 name: parksmap-dev-configmap
-          image: docker-registry.default.svc:5000/%REPO%-parks-dev/parksmap-dev:0.0-0
+          image: docker-registry.default.svc:5000/%GUID%-parks-dev/parksmap-dev:0.0-0
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 3
