@@ -756,344 +756,6 @@ items:
     type: ClusterIP
   status:
 
-#green builconfigs
-- apiVersion: v1
-  kind: BuildConfig
-  metadata:
-    annotations:
-      openshift.io/generated-by: OpenShiftNewBuild
-    creationTimestamp: null
-    labels:
-      build: mlbparks-green
-    name: mlbparks-green
-  spec:
-    failedBuildsHistoryLimit: 5
-    nodeSelector: null
-    output:
-      to:
-        kind: ImageStreamTag
-        name: mlbparks-green:latest
-    postCommit: {}
-    resources: {}
-    runPolicy: Serial
-    source:
-      binary: {}
-      type: Binary
-    strategy:
-      sourceStrategy:
-        from:
-          kind: ImageStreamTag
-          name: jboss-eap70-openshift:1.7
-          namespace: openshift
-      type: Source
-    successfulBuildsHistoryLimit: 5
-    triggers:
-    - github:
-        secret: vTS5SIZ5OeSK7e_6CAbv
-      type: GitHub
-    - generic:
-        secret: cdR2teA5VCEEu7hZOMG6
-      type: Generic
-  status:
-    lastVersion: 0
-- apiVersion: v1
-  kind: BuildConfig
-  metadata:
-    annotations:
-      openshift.io/generated-by: OpenShiftNewBuild
-    creationTimestamp: null
-    labels:
-      build: nationalparks-green
-    name: nationalparks-green
-  spec:
-    failedBuildsHistoryLimit: 5
-    nodeSelector: null
-    output:
-      to:
-        kind: ImageStreamTag
-        name: nationalparks-green:latest
-    postCommit: {}
-    resources: {}
-    runPolicy: Serial
-    source:
-      binary: {}
-      type: Binary
-    strategy:
-      sourceStrategy:
-        from:
-          kind: ImageStreamTag
-          name: redhat-openjdk18-openshift:1.2
-          namespace: openshift
-      type: Source
-    successfulBuildsHistoryLimit: 5
-    triggers:
-    - github:
-        secret: rmWW9gXJx37XcrHERw_K
-      type: GitHub
-    - generic:
-        secret: t_9chSRhUqCQ704rJM24
-      type: Generic
-  status:
-    lastVersion: 0
-- apiVersion: v1
-  kind: BuildConfig
-  metadata:
-    annotations:
-      openshift.io/generated-by: OpenShiftNewBuild
-    creationTimestamp: null
-    labels:
-      build: parksmap-green
-    name: parksmap-green
-  spec:
-    failedBuildsHistoryLimit: 5
-    nodeSelector: null
-    output:
-      to:
-        kind: ImageStreamTag
-        name: parksmap-green:latest
-    postCommit: {}
-    resources: {}
-    runPolicy: Serial
-    source:
-      binary: {}
-      type: Binary
-    strategy:
-      sourceStrategy:
-        from:
-          kind: ImageStreamTag
-          name: redhat-openjdk18-openshift:1.2
-          namespace: openshift
-      type: Source
-    successfulBuildsHistoryLimit: 5
-    triggers:
-    - github:
-        secret: kJjOTMkchwy8TLBMkGhv
-      type: GitHub
-    - generic:
-        secret: f46kHB8sajngQIeQDzXX
-      type: Generic
-  status:
-    lastVersion: 0
-
-#blue builconfigs
-- apiVersion: v1
-  kind: BuildConfig
-  metadata:
-    annotations:
-      openshift.io/generated-by: OpenShiftNewBuild
-    creationTimestamp: null
-    labels:
-      build: mlbparks-blue
-    name: mlbparks-blue
-  spec:
-    failedBuildsHistoryLimit: 5
-    nodeSelector: null
-    output:
-      to:
-        kind: ImageStreamTag
-        name: mlbparks-blue:latest
-    postCommit: {}
-    resources: {}
-    runPolicy: Serial
-    source:
-      binary: {}
-      type: Binary
-    strategy:
-      sourceStrategy:
-        from:
-          kind: ImageStreamTag
-          name: jboss-eap70-openshift:1.7
-          namespace: openshift
-      type: Source
-    successfulBuildsHistoryLimit: 5
-    triggers:
-    - github:
-        secret: vTS5SIZ5OeSK7e_6CAbv
-      type: GitHub
-    - generic:
-        secret: cdR2teA5VCEEu7hZOMG6
-      type: Generic
-  status:
-    lastVersion: 0
-- apiVersion: v1
-  kind: BuildConfig
-  metadata:
-    annotations:
-      openshift.io/generated-by: OpenShiftNewBuild
-    creationTimestamp: null
-    labels:
-      build: nationalparks-blue
-    name: nationalparks-blue
-  spec:
-    failedBuildsHistoryLimit: 5
-    nodeSelector: null
-    output:
-      to:
-        kind: ImageStreamTag
-        name: nationalparks-blue:latest
-    postCommit: {}
-    resources: {}
-    runPolicy: Serial
-    source:
-      binary: {}
-      type: Binary
-    strategy:
-      sourceStrategy:
-        from:
-          kind: ImageStreamTag
-          name: redhat-openjdk18-openshift:1.2
-          namespace: openshift
-      type: Source
-    successfulBuildsHistoryLimit: 5
-    triggers:
-    - github:
-        secret: rmWW9gXJx37XcrHERw_K
-      type: GitHub
-    - generic:
-        secret: t_9chSRhUqCQ704rJM24
-      type: Generic
-  status:
-    lastVersion: 0
-- apiVersion: v1
-  kind: BuildConfig
-  metadata:
-    annotations:
-      openshift.io/generated-by: OpenShiftNewBuild
-    creationTimestamp: null
-    labels:
-      build: parksmap-blue
-    name: parksmap-blue
-  spec:
-    failedBuildsHistoryLimit: 5
-    nodeSelector: null
-    output:
-      to:
-        kind: ImageStreamTag
-        name: parksmap-blue:latest
-    postCommit: {}
-    resources: {}
-    runPolicy: Serial
-    source:
-      binary: {}
-      type: Binary
-    strategy:
-      sourceStrategy:
-        from:
-          kind: ImageStreamTag
-          name: redhat-openjdk18-openshift:1.2
-          namespace: openshift
-      type: Source
-    successfulBuildsHistoryLimit: 5
-    triggers:
-    - github:
-        secret: kJjOTMkchwy8TLBMkGhv
-      type: GitHub
-    - generic:
-        secret: f46kHB8sajngQIeQDzXX
-      type: Generic
-  status:
-    lastVersion: 0
-
-#green imagestreams
-- apiVersion: v1
-  kind: ImageStream
-  metadata:
-    annotations:
-      openshift.io/generated-by: OpenShiftNewBuild
-      openshift.io/image.dockerRepositoryCheck: 2018-10-26T05:38:08Z
-    creationTimestamp: null
-    generation: 3
-    labels:
-      build: mlbparks-green
-    name: mlbparks-green
-  spec:
-    lookupPolicy:
-      local: false
-  status:
-    dockerImageRepository: ""
-- apiVersion: v1
-  kind: ImageStream
-  metadata:
-    annotations:
-      openshift.io/generated-by: OpenShiftNewBuild
-      openshift.io/image.dockerRepositoryCheck: 2018-10-26T05:38:09Z
-    creationTimestamp: null
-    generation: 3
-    labels:
-      build: nationalparks-green
-    name: nationalparks-green
-  spec:
-    lookupPolicy:
-      local: false
-  status:
-    dockerImageRepository: ""
-- apiVersion: v1
-  kind: ImageStream
-  metadata:
-    annotations:
-      openshift.io/generated-by: OpenShiftNewBuild
-      openshift.io/image.dockerRepositoryCheck: 2018-10-26T05:37:04Z
-    creationTimestamp: null
-    generation: 3
-    labels:
-      build: parksmap-green
-    name: parksmap-green
-  spec:
-    lookupPolicy:
-      local: false
-  status:
-    dockerImageRepository: ""
-
-#blue imagestreams
-- apiVersion: v1
-  kind: ImageStream
-  metadata:
-    annotations:
-      openshift.io/generated-by: OpenShiftNewBuild
-      openshift.io/image.dockerRepositoryCheck: 2018-10-26T05:38:08Z
-    creationTimestamp: null
-    generation: 3
-    labels:
-      build: mlbparks-blue
-    name: mlbparks-blue
-  spec:
-    lookupPolicy:
-      local: false
-  status:
-    dockerImageRepository: ""
-- apiVersion: v1
-  kind: ImageStream
-  metadata:
-    annotations:
-      openshift.io/generated-by: OpenShiftNewBuild
-      openshift.io/image.dockerRepositoryCheck: 2018-10-26T05:38:09Z
-    creationTimestamp: null
-    generation: 3
-    labels:
-      build: nationalparks-blue
-    name: nationalparks-blue
-  spec:
-    lookupPolicy:
-      local: false
-  status:
-    dockerImageRepository: ""
-- apiVersion: v1
-  kind: ImageStream
-  metadata:
-    annotations:
-      openshift.io/generated-by: OpenShiftNewBuild
-      openshift.io/image.dockerRepositoryCheck: 2018-10-26T05:37:04Z
-    creationTimestamp: null
-    generation: 3
-    labels:
-      build: parksmap-blue
-    name: parksmap-blue
-  spec:
-    lookupPolicy:
-      local: false
-  status:
-    dockerImageRepository: ""
-
 #green configmaps
 - apiVersion: v1
   data:
@@ -1170,6 +832,59 @@ items:
     creationTimestamp: null
     name: parksmap-blue-configmap
 
-#todo route
+#routes
+- apiVersion: v1
+  kind: Route
+  metadata:
+    annotations:
+      openshift.io/host.generated: "true"
+    creationTimestamp: null
+    labels:
+      app: mlbparks-green
+      type: parksmap-backend
+    name: mlbparks-route
+  spec:
+    port:
+      targetPort: 8080
+    to:
+      kind: Service
+      name: mlbparks-green
+      weight: 100
+    wildcardPolicy: None
+  status:
+    ingress:
+    - conditions:
+      - lastTransitionTime: 2018-11-12T12:53:35Z
+        status: "True"
+        type: Admitted
+      routerName: router
+      wildcardPolicy: None
+- apiVersion: v1
+  kind: Route
+  metadata:
+    annotations:
+      openshift.io/host.generated: "true"
+    creationTimestamp: null
+    labels:
+      app: nationalparks-green
+      type: parksmap-backend
+    name: nationalparks-route
+  spec:
+    port:
+      targetPort: 8080
+    to:
+      kind: Service
+      name: nationalparks-green
+      weight: 100
+    wildcardPolicy: None
+  status:
+    ingress:
+    - conditions:
+      - lastTransitionTime: 2018-11-12T12:53:36Z
+        status: "True"
+        type: Admitted
+      routerName: router
+      wildcardPolicy: None
+
 kind: List
 metadata: {}
