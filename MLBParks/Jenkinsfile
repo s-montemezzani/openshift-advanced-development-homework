@@ -84,24 +84,12 @@ podTemplate(
 
         sh "oc start-build mlbparks-dev --follow --from-file=./target/mlbparks.war -n ${GUID}-parks-dev"
 
-        sh "oc tag mlbparks-dev:latest mlbparks-dev:${devTag} -n ${GUID}-parks-dev"
-
-        /*
-        openshiftVerifyBuild bldCfg: 'tasks', checkForTriggeredDeployments: 'false',
-                             namespace: 'mons-tasks-dev', verbose: 'false', waitTime: ''
-
+        openshiftVerifyBuild bldCfg: 'mlbparks-dev', checkForTriggeredDeployments: 'false',
+                             namespace: '${GUID}-parks-dev', verbose: 'false', waitTime: ''
         //just does some oc get builds into greps...
         //https://github.com/openshift/jenkins-plugin
 
-        */
-
-        /*
-        openshiftTag alias: 'false',
-        destStream: 'tasks', destTag: devTag,
-                     destinationNamespace: 'mons-tasks-dev', namespace: 'mons-tasks-dev',
-                     srcStream: 'tasks', srcTag: 'latest', verbose: 'false'
-        */
-
+        sh "oc tag mlbparks-dev:latest mlbparks-dev:${devTag} -n ${GUID}-parks-dev"
       }
 
       // Deploy the built image to the Development Environment.
@@ -111,32 +99,30 @@ podTemplate(
         sh "oc set image dc/mlbparks-dev mlbparks-dev=docker-registry.default.svc:5000/${GUID}-parks-dev/mlbparks-dev:${devTag} -n ${GUID}-parks-dev"
         sh "oc rollout latest mlbparks-dev -n ${GUID}-parks-dev"
 
-        //alternative to openshiftVerifyDeployment
-        while (true) {
-           echo "Checking if latest rollout of mlbparks-dev is Ready... "
-           //sh "oc get pod -n ${GUID}-parks-dev | grep mlbparks-dev | grep -v deploy | grep '1/1' | grep Running"
-
-           int returnCode = sh(script: "oc get pod -n ${GUID}-parks-dev | grep mlbparks-dev | grep -v deploy | grep '1/1' | grep Running", returnStatus:true)
-           if (returnCode == 0) break;
-           echo "...no (returnCode is ${returnCode}). Sleeping 10 seconds."
-           sleep 10
-        }
-        /*
-        // Deploy the development application.
-        // Replace mons-tasks-dev with the name of your production project
-
-        openshiftDeploy depCfg: 'tasks', namespace: 'mons-tasks-dev', verbose: 'false', waitTime: '', waitUnit: 'sec'
-        openshiftVerifyDeployment depCfg: 'tasks', namespace: 'mons-tasks-dev', replicaCount: '1', verbose: 'false', verifyReplicaCount: 'false', waitTime: '', waitUnit: 'sec'
-        openshiftVerifyService namespace: 'mons-tasks-dev', svcName: 'tasks', verbose: 'false'
-    */
-
-
+        openshiftVerifyDeployment depCfg: 'mlbparks-dev', namespace: '${GUID}-parks-dev', replicaCount: '1', verbose: 'false', verifyReplicaCount: 'false', waitTime: '', waitUnit: 'sec'
+        openshiftVerifyService namespace: '${GUID}-parks-dev', svcName: 'mlbparks-dev', verbose: 'false'
       }
 
       // Run Integration Tests in the Development Environment.
       stage('Integration Tests') {
         echo "Running Integration Tests"
-        // TBD
+
+        //part of the liveness probe, but we'll repeat
+        String healthz = sh(script: "curl mlbparks-dev.${GUID}-parks-dev.svc.cluster.local:8080/ws/healthz", returnStdout:true).trim();
+        if (!healthz.equals("OK")) {
+            currentBuild.result = 'ABORTED'
+            error('/ws/healthz return string was not correct. Was ${healthz}')
+        }
+
+        //the return string is actually hardcoded, doens't even need the DB => not much of an integration test...
+        //populating the DB (/ws/data/load) makes /ws/data/all return the info, but there seems to be no way to clear the database => also that would not be much of an integration test...
+        String info = sh(script: "curl mlbparks-dev.${GUID}-parks-dev.svc.cluster.local:8080/ws/info", returnStdout:true).trim();
+        String expectedInfo = "{"id":"mlbparks","displayName":"MLB Parks (Dev)","center":{"latitude":"39.82","longitude":"-98.57"},"zoom":5}"
+        if (!info.equals(expectedInfo)) {
+            currentBuild.result = 'ABORTED'
+            error('/ws/info return string was not "${expectedInfo}". Was "${info}"')
+        }
+
       }
 
       // Copy Image to Nexus Docker Registry
