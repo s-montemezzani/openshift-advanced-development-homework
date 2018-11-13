@@ -195,15 +195,15 @@ podTemplate(
         //see hint in ParksMap/readme.doc: we have to delete the 'old' service (if any) and create the new one
 
         if (greenIsActive) {
-            sh 'oc delete svc mlbparks-green'
+            sh "oc delete svc mlbparks-green"
         }
         if (blueIsActive) {
-            sh 'oc delete svc mlbparks-blue'
+            sh "oc delete svc mlbparks-blue"
         }
         //we don't delete replication controller, ... because we want to keep the "old" application running, just not "active" (i.e. not found by the frontend parksmap)
 
-        sh 'oc expose dc ${destApp} --port=8080 -n ${GUID}-parks-prod'
-        sh 'oc label svc ${destApp} type=parksmap-backend -n ${GUID}-parks-prod'
+        sh "oc expose dc ${destApp} --port=8080 -n ${GUID}-parks-prod"
+        sh "oc label svc ${destApp} type=parksmap-backend -n ${GUID}-parks-prod"
         openshiftVerifyService namespace: '${GUID}-parks-prod', svcName: destApp, verbose: 'false'
 
       }
