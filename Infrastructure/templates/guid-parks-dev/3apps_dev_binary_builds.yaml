@@ -335,6 +335,8 @@ items:
     replicas: 0
     unavailableReplicas: 0
     updatedReplicas: 0
+
+#services
 - apiVersion: v1
   kind: Service
   metadata:
@@ -374,6 +376,52 @@ items:
     sessionAffinity: None
     type: ClusterIP
   status:
+- apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: null
+    labels:
+      app: parksmap-dev
+    name: parksmap-dev
+  spec:
+    ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      app: parksmap-dev
+      deploymentconfig: parksmap-dev
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+
+#parksmap route
+- apiVersion: v1
+  kind: Route
+  metadata:
+    annotations:
+      openshift.io/host.generated: "true"
+    creationTimestamp: null
+    labels:
+    name: parksmap
+  spec:
+    port:
+      targetPort: 8080
+    to:
+      kind: Service
+      name: parksmap-dev
+      weight: 100
+    wildcardPolicy: None
+  status:
+    ingress:
+    - conditions:
+      - lastTransitionTime: 2018-11-12T12:53:36Z
+        status: "True"
+        type: Admitted
+      routerName: router
+      wildcardPolicy: None
+
+#buildconfigs
 - apiVersion: v1
   kind: BuildConfig
   metadata:

@@ -138,8 +138,6 @@ podTemplate(
        "docker://docker-registry.default.svc.cluster.local:5000/${GUID}-parks-dev/mlbparks-dev:${devTag} " +
        "docker://nexus-registry.${GUID}-nexus.svc.cluster.local:5000/mlbparks-dev:${devTag}"
 
-        // Tag the built image with the production tag.
-//        openshiftTag alias: 'false', destStream: 'tasks', destTag: prodTag, destinationNamespace: 'xyz-tasks-dev', namespace: 'xyz-tasks-dev', srcStream: 'tasks', srcTag: devTag, verbose: 'false'
       sh "oc tag mlbparks-dev:${devTag} mlbparks-dev:${prodTag} -n ${GUID}-parks-dev"
 
 
@@ -148,12 +146,35 @@ podTemplate(
       // Blue/Green Deployment into Production
       // -------------------------------------
       // Do not activate the new version yet.
-      def destApp   = "mlbparks-green"
+      def destApp   = ""
       def activeApp = ""
+        boolean greenIsActive=false
+        boolean blueIsActive =false
 
       stage('Blue/Green Production Deployment') {
-          activeApp = sh(returnStdout: true, script: "oc get route mlbparks-route -n ${GUID}-parks-prod -o jsonpath='{ .spec.to.name }'").trim()
-          if (activeApp == "mlbparks-green") {
+          //look at the active service
+
+          //oc get svc existing_service returns 0. oc get svc NOT_existing_service returns 1
+          greenIsActive = sh(returnStatus: true, script: "oc get svc mlbparks-green")
+          echo "greenIsActive: ${greenIsActive}"
+          blueIsActive = sh(returnStatus: true, script: "oc get svc mlbparks-blue")
+          echo "blueIsActive: ${blueIsActive}"
+
+          if (greenIsActive && blueIsActive) {
+            currentBuild.result = 'ABORTED'
+            error('Both green and blue services are present???')
+          }
+          else if (greenIsActive) {
+            activeApp = "mlbparks-green"
+            destApp = "mlbparks-blue"
+          }
+          else if (blueIsActive) {
+            activeApp = "mlbparks-blue"
+            destApp = "mlbparks-green"
+          }
+          else {
+          //we have to start by deploying the blue. Homework instructions 3.4 "Make the Green service active initially to guarantee a Blue rollout upon the first pipeline run"
+            activeApp = "none"
             destApp = "mlbparks-blue"
           }
           echo "Active Application:      " + activeApp
@@ -163,7 +184,6 @@ podTemplate(
           sh "oc set image dc/${destApp} ${destApp}=docker-registry.default.svc:5000/${GUID}-parks-dev/mlbparks-dev:${prodTag} -n ${GUID}-parks-prod"
           sh "oc rollout latest ${destApp} -n ${GUID}-parks-prod"
 
-          // Deploy the inactive application.
           openshiftVerifyDeployment depCfg: destApp, namespace: '${GUID}-parks-prod', replicaCount: '1', verbose: 'false', verifyReplicaCount: 'true', waitTime: '', waitUnit: 'sec'
           openshiftVerifyService namespace: '${GUID}-parks-prod', svcName: destApp, verbose: 'false'
       }
@@ -173,8 +193,18 @@ podTemplate(
 //          input "Switch Production?"
 
         echo "Switching Production application to ${destApp}."
+        //see hint in ParksMap/readme.doc: we have to delete the 'old' service (if any) and create the new one
 
-        sh 'oc patch route mlbparks-route -n ${GUID}-parks-prod -p \'{"spec":{"to":{"name":"' + destApp + '"}}}\''
+        if (greenIsActive) {
+            sh 'oc delete svc mlbparks-green'
+        }
+        if (blueIsActive) {
+            sh 'oc delete svc mlbparks-blue'
+        }
+        //we don't delete replication controller, ... because we want to keep the "old" application running, just not "active" (i.e. not found by the frontend parksmap)
+
+        sh 'oc expose dc ${destApp} --port=8080 -n ${GUID}-parks-prod'
+        sh 'oc label svc ${destApp} type=parksmap-backend -n ${GUID}-parks-prod'
       }
     }
   }

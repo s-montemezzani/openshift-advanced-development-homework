@@ -704,87 +704,47 @@ items:
     unavailableReplicas: 0
     updatedReplicas: 0
 
-#green services
+#green parksmap service
 - apiVersion: v1
   kind: Service
   metadata:
     creationTimestamp: null
     labels:
-      app: mlbparks-green
-      type: parksmap-backend
-    name: mlbparks-green
+      app: parksmap-green
+    name: parksmap-green
   spec:
     ports:
     - port: 8080
       protocol: TCP
       targetPort: 8080
     selector:
-      app: mlbparks-green
-      deploymentconfig: mlbparks-green
+      app: parksmap-green
+      deploymentconfig: parksmap-green
     sessionAffinity: None
     type: ClusterIP
   status:
     loadBalancer: {}
-- apiVersion: v1
-  kind: Service
-  metadata:
-    creationTimestamp: null
-    labels:
-      app: nationalparks-green
-      type: parksmap-backend
-    name: nationalparks-green
-  spec:
-    ports:
-    - port: 8080
-      protocol: TCP
-      targetPort: 8080
-    selector:
-      app: nationalparks-green
-      deploymentconfig: nationalparks-green
-    sessionAffinity: None
-    type: ClusterIP
-  status:
 
-#blue services
+#blue parksmap service
 - apiVersion: v1
   kind: Service
   metadata:
     creationTimestamp: null
     labels:
-      app: mlbparks-blue
-      type: parksmap-backend
-    name: mlbparks-blue
+      app: parksmap-blue
+    name: parksmap-blue
   spec:
     ports:
     - port: 8080
       protocol: TCP
       targetPort: 8080
     selector:
-      app: mlbparks-blue
-      deploymentconfig: mlbparks-blue
+      app: parksmap-blue
+      deploymentconfig: parksmap-blue
     sessionAffinity: None
     type: ClusterIP
   status:
     loadBalancer: {}
-- apiVersion: v1
-  kind: Service
-  metadata:
-    creationTimestamp: null
-    labels:
-      app: nationalparks-blue
-      type: parksmap-backend
-    name: nationalparks-blue
-  spec:
-    ports:
-    - port: 8080
-      protocol: TCP
-      targetPort: 8080
-    selector:
-      app: nationalparks-blue
-      deploymentconfig: nationalparks-blue
-    sessionAffinity: None
-    type: ClusterIP
-  status:
 
 #green configmaps
 - apiVersion: v1
@@ -868,7 +828,7 @@ items:
     creationTimestamp: null
     name: parksmap-blue-configmap
 
-#routes
+#parksmap route
 - apiVersion: v1
   kind: Route
   metadata:
@@ -876,41 +836,13 @@ items:
       openshift.io/host.generated: "true"
     creationTimestamp: null
     labels:
-      app: mlbparks-green
-      type: parksmap-backend
-    name: mlbparks-route
+    name: parksmap
   spec:
     port:
       targetPort: 8080
     to:
       kind: Service
-      name: mlbparks-green
-      weight: 100
-    wildcardPolicy: None
-  status:
-    ingress:
-    - conditions:
-      - lastTransitionTime: 2018-11-12T12:53:35Z
-        status: "True"
-        type: Admitted
-      routerName: router
-      wildcardPolicy: None
-- apiVersion: v1
-  kind: Route
-  metadata:
-    annotations:
-      openshift.io/host.generated: "true"
-    creationTimestamp: null
-    labels:
-      app: nationalparks-green
-      type: parksmap-backend
-    name: nationalparks-route
-  spec:
-    port:
-      targetPort: 8080
-    to:
-      kind: Service
-      name: nationalparks-green
+      name: placeholder
       weight: 100
     wildcardPolicy: None
   status:
