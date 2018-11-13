@@ -155,9 +155,9 @@ podTemplate(
           //look at the active service
 
           //oc get svc existing_service returns 0. oc get svc NOT_existing_service returns 1
-          greenIsActive = sh(returnStatus: true, script: "oc get svc mlbparks-green")
+          greenIsActive = 0 == sh(returnStatus: true, script: "oc get svc mlbparks-green")
           echo "greenIsActive: ${greenIsActive}"
-          blueIsActive = sh(returnStatus: true, script: "oc get svc mlbparks-blue")
+          blueIsActive = 0 == sh(returnStatus: true, script: "oc get svc mlbparks-blue")
           echo "blueIsActive: ${blueIsActive}"
 
           if (greenIsActive && blueIsActive) {
