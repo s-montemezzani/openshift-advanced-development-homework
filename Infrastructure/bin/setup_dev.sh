@@ -116,8 +116,8 @@ oc set probe dc/parksmap-dev --readiness --failure-threshold 3 --initial-delay-s
 oc set probe dc/mlbparks-dev --liveness --failure-threshold 3 --initial-delay-seconds 60 --get-url=http://:8080/ws/healthz -n $GUID-parks-dev
 oc set probe dc/mlbparks-dev --readiness --failure-threshold 3 --initial-delay-seconds 60 --get-url=http://:8080/ws/healthz -n $GUID-parks-dev
 
-oc set probe dc/nationalparks-dev --liveness --failure-threshold 3 --initial-delay-seconds 60 --get-url=http://:8080/ws/healthz -n $GUID-parks-dev
-oc set probe dc/nationalparks-dev --readiness --failure-threshold 3 --initial-delay-seconds 60 --get-url=http://:8080/ws/healthz -n $GUID-parks-dev
+oc set probe dc/nationalparks-dev --liveness --failure-threshold 3 --initial-delay-seconds 60 --get-url=http://:8080/ws/healthz/ -n $GUID-parks-dev
+oc set probe dc/nationalparks-dev --readiness --failure-threshold 3 --initial-delay-seconds 60 --get-url=http://:8080/ws/healthz/ -n $GUID-parks-dev
 
 #deployment hook only for nationalparks, mlbparks, according to README.adoc
 #test
@@ -130,24 +130,5 @@ oc set deployment-hook --post dc/mlbparks-dev --failure-policy="abort" -n $GUID-
 oc export dc,bc,is,cm,svc > 3apps_dev_binary_builds.yaml
 
 sed "s/%GUID%/$GUID/g" ../templates/guid-parks-dev/3apps_dev_binary_builds.yaml | oc create -n $GUID-parks-dev -f -
-
-/*
-MLBParks expects the MongoDB connection information in the following environment variables:
-
-* DB_HOST=mongodb (Name of the MongoDB Service)
-* DB_PORT=27017 (Port the MongoDB Service is running under)
-* DB_USERNAME=mongodb (Username for the MongoDB database)
-* DB_PASSWORD=mongodb (Password for the user)
-* DB_NAME=parks (Database Name)
-* DB_REPLICASET=rs0 (Name of the Replicaset if MongoDB is deployed as a Stateful Service. Not set for standalone database)
-
-MLBParks also expects an environment variable  (which can be set in the Config Map as well if desired) to set the displayed name of the backend. It is *mandatory* for this variable to be set for the automatic grading to succeed.
-
-Valid values are:
-
-* APPNAME="MLB Parks (Green)"
-* APPNAME="MLB Parks (Blue)"
-
-*/
 
 

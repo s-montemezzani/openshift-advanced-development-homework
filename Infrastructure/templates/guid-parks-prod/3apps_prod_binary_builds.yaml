@@ -65,6 +65,11 @@ items:
               configMapKeyRef:
                 key: DB_USERNAME
                 name: mlbparks-green-configmap
+          - name: DB_REPLICASET
+            valueFrom:
+              configMapKeyRef:
+                key: DB_REPLICASET
+                name: mlbparks-green-configmap
           - name: APPNAME
             valueFrom:
               configMapKeyRef:
@@ -174,6 +179,11 @@ items:
               configMapKeyRef:
                 key: DB_USERNAME
                 name: nationalparks-green-configmap
+          - name: DB_REPLICASET
+            valueFrom:
+              configMapKeyRef:
+                key: DB_REPLICASET
+                name: nationalparks-green-configmap
           - name: APPNAME
             valueFrom:
               configMapKeyRef:
@@ -194,7 +204,7 @@ items:
           livenessProbe:
             failureThreshold: 3
             httpGet:
-              path: /ws/healthz
+              path: /ws/healthz/
               port: 8080
               scheme: HTTP
             initialDelaySeconds: 60
@@ -205,7 +215,7 @@ items:
           readinessProbe:
             failureThreshold: 3
             httpGet:
-              path: /ws/healthz
+              path: /ws/healthz/
               port: 8080
               scheme: HTTP
             initialDelaySeconds: 60
@@ -290,6 +300,11 @@ items:
             valueFrom:
               configMapKeyRef:
                 key: DB_USERNAME
+                name: parksmap-green-configmap
+          - name: DB_REPLICASET
+            valueFrom:
+              configMapKeyRef:
+                key: DB_REPLICASET
                 name: parksmap-green-configmap
           - name: APPNAME
             valueFrom:
@@ -402,6 +417,11 @@ items:
               configMapKeyRef:
                 key: DB_USERNAME
                 name: mlbparks-blue-configmap
+          - name: DB_REPLICASET
+            valueFrom:
+              configMapKeyRef:
+                key: DB_REPLICASET
+                name: mlbparks-blue-configmap
           - name: APPNAME
             valueFrom:
               configMapKeyRef:
@@ -511,6 +531,11 @@ items:
               configMapKeyRef:
                 key: DB_USERNAME
                 name: nationalparks-blue-configmap
+          - name: DB_REPLICASET
+            valueFrom:
+              configMapKeyRef:
+                key: DB_REPLICASET
+                name: nationalparks-blue-configmap
           - name: APPNAME
             valueFrom:
               configMapKeyRef:
@@ -531,7 +556,7 @@ items:
           livenessProbe:
             failureThreshold: 3
             httpGet:
-              path: /ws/healthz
+              path: /ws/healthz/
               port: 8080
               scheme: HTTP
             initialDelaySeconds: 60
@@ -542,7 +567,7 @@ items:
           readinessProbe:
             failureThreshold: 3
             httpGet:
-              path: /ws/healthz
+              path: /ws/healthz/
               port: 8080
               scheme: HTTP
             initialDelaySeconds: 60
@@ -627,6 +652,11 @@ items:
             valueFrom:
               configMapKeyRef:
                 key: DB_USERNAME
+                name: parksmap-blue-configmap
+          - name: DB_REPLICASET
+            valueFrom:
+              configMapKeyRef:
+                key: DB_REPLICASET
                 name: parksmap-blue-configmap
           - name: APPNAME
             valueFrom:
@@ -765,6 +795,7 @@ items:
     DB_PASSWORD: mongodb
     DB_PORT: "27017"
     DB_USERNAME: mongodb
+    DB_REPLICASET: rs0
   kind: ConfigMap
   metadata:
     creationTimestamp: null
@@ -777,6 +808,7 @@ items:
     DB_PASSWORD: mongodb
     DB_PORT: "27017"
     DB_USERNAME: mongodb
+    DB_REPLICASET: rs0
   kind: ConfigMap
   metadata:
     creationTimestamp: null
@@ -789,6 +821,7 @@ items:
     DB_PASSWORD: mongodb
     DB_PORT: "27017"
     DB_USERNAME: mongodb
+    DB_REPLICASET: rs0
   kind: ConfigMap
   metadata:
     creationTimestamp: null
@@ -803,6 +836,7 @@ items:
     DB_PASSWORD: mongodb
     DB_PORT: "27017"
     DB_USERNAME: mongodb
+    DB_REPLICASET: rs0
   kind: ConfigMap
   metadata:
     creationTimestamp: null
@@ -815,6 +849,7 @@ items:
     DB_PASSWORD: mongodb
     DB_PORT: "27017"
     DB_USERNAME: mongodb
+    DB_REPLICASET: rs0
   kind: ConfigMap
   metadata:
     creationTimestamp: null
@@ -827,6 +862,7 @@ items:
     DB_PASSWORD: mongodb
     DB_PORT: "27017"
     DB_USERNAME: mongodb
+    DB_REPLICASET: rs0
   kind: ConfigMap
   metadata:
     creationTimestamp: null
