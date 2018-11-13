@@ -185,7 +185,6 @@ podTemplate(
           sh "oc rollout latest ${destApp} -n ${GUID}-parks-prod"
 
           openshiftVerifyDeployment depCfg: destApp, namespace: '${GUID}-parks-prod', replicaCount: '1', verbose: 'false', verifyReplicaCount: 'true', waitTime: '', waitUnit: 'sec'
-          openshiftVerifyService namespace: '${GUID}-parks-prod', svcName: destApp, verbose: 'false'
       }
 
       stage('Switch over to new Version') {
@@ -205,6 +204,8 @@ podTemplate(
 
         sh 'oc expose dc ${destApp} --port=8080 -n ${GUID}-parks-prod'
         sh 'oc label svc ${destApp} type=parksmap-backend -n ${GUID}-parks-prod'
+        openshiftVerifyService namespace: '${GUID}-parks-prod', svcName: destApp, verbose: 'false'
+
       }
     }
   }
