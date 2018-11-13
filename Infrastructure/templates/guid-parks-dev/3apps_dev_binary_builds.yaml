@@ -300,7 +300,7 @@ items:
           livenessProbe:
             failureThreshold: 3
             httpGet:
-              path: /ws/healthz
+              path: /ws/healthz/
               port: 8080
               scheme: HTTP
             initialDelaySeconds: 60
@@ -311,7 +311,7 @@ items:
           readinessProbe:
             failureThreshold: 3
             httpGet:
-              path: /ws/healthz
+              path: /ws/healthz/
               port: 8080
               scheme: HTTP
             initialDelaySeconds: 60

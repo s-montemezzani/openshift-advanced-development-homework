@@ -110,8 +110,8 @@ oc set env dc/parksmap-dev --from=configmap/parksmap-dev-configmap -n $GUID-park
 oc set env dc/mlbparks-dev --from=configmap/mlbparks-dev-configmap -n $GUID-parks-dev
 oc set env dc/nationalparks-dev --from=configmap/nationalparks-dev-configmap -n $GUID-parks-dev
 
-oc set probe dc/parksmap-dev --liveness --failure-threshold 3 --initial-delay-seconds 60 --get-url=http://:8080/ws/healthz -n $GUID-parks-dev
-oc set probe dc/parksmap-dev --readiness --failure-threshold 3 --initial-delay-seconds 60 --get-url=http://:8080/ws/healthz -n $GUID-parks-dev
+oc set probe dc/parksmap-dev --liveness --failure-threshold 3 --initial-delay-seconds 60 --get-url=http://:8080/ws/healthz/ -n $GUID-parks-dev
+oc set probe dc/parksmap-dev --readiness --failure-threshold 3 --initial-delay-seconds 60 --get-url=http://:8080/ws/healthz/ -n $GUID-parks-dev
 
 oc set probe dc/mlbparks-dev --liveness --failure-threshold 3 --initial-delay-seconds 60 --get-url=http://:8080/ws/healthz -n $GUID-parks-dev
 oc set probe dc/mlbparks-dev --readiness --failure-threshold 3 --initial-delay-seconds 60 --get-url=http://:8080/ws/healthz -n $GUID-parks-dev
@@ -129,6 +129,6 @@ oc set deployment-hook --post dc/mlbparks-dev --failure-policy="abort" -n $GUID-
 
 oc export dc,bc,is,cm,svc > 3apps_dev_binary_builds.yaml
 
+oc policy add-role-to-user view --serviceaccount=default -n $GUID-parks-dev
 sed "s/%GUID%/$GUID/g" ../templates/guid-parks-dev/3apps_dev_binary_builds.yaml | oc create -n $GUID-parks-dev -f -
-
 
