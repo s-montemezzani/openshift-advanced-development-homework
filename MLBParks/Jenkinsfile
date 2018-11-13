@@ -155,9 +155,9 @@ podTemplate(
           //look at the active service
 
           //oc get svc existing_service returns 0. oc get svc NOT_existing_service returns 1
-          greenIsActive = 0 == sh(returnStatus: true, script: "oc get svc mlbparks-green")
+          greenIsActive = 0 == sh(returnStatus: true, script: "oc get svc mlbparks-green -n ${GUID}-parks-prod")
           echo "greenIsActive: ${greenIsActive}"
-          blueIsActive = 0 == sh(returnStatus: true, script: "oc get svc mlbparks-blue")
+          blueIsActive = 0 == sh(returnStatus: true, script: "oc get svc mlbparks-blue -n ${GUID}-parks-prod")
           echo "blueIsActive: ${blueIsActive}"
 
           if (greenIsActive && blueIsActive) {
@@ -195,10 +195,10 @@ podTemplate(
         //see hint in ParksMap/readme.doc: we have to delete the 'old' service (if any) and create the new one
 
         if (greenIsActive) {
-            sh "oc delete svc mlbparks-green"
+            sh "oc delete svc mlbparks-green -n ${GUID}-parks-prod"
         }
         if (blueIsActive) {
-            sh "oc delete svc mlbparks-blue"
+            sh "oc delete svc mlbparks-blue -n ${GUID}-parks-prod"
         }
         //we don't delete replication controller, ... because we want to keep the "old" application running, just not "active" (i.e. not found by the frontend parksmap)
 
