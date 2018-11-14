@@ -99,9 +99,9 @@ sed "s/%GUID%/$GUID/g;s/%CLUSTER%/$CLUSTER/g;s~%REPO%~$REPO~g" ./Infrastructure/
 #oc cancel-build nationalparks-pipeline-1 -n $GUID-jenkins
 #oc cancel-build parksmap-pipeline-1 -n $GUID-jenkins
 
-oc delete build mlbparks-pipeline-1
-oc delete build nationalparks-pipeline-1
-oc delete build parksmap-pipeline-1
+#oc delete build mlbparks-pipeline-1
+#oc delete build nationalparks-pipeline-1
+#oc delete build parksmap-pipeline-1
 
 while : ; do
    echo "Checking if Jenkins is Ready..."
@@ -111,6 +111,10 @@ while : ; do
    echo "...no. Sleeping 10 seconds."
    sleep 10
 done
+
+oc cancel-build mlbparks-pipeline-1 --request-timeout="2m" -n $GUID-jenkins
+oc cancel-build nationalparks-pipeline-1 --request-timeout="2m" -n $GUID-jenkins
+oc cancel-build parksmap-pipeline-1 --request-timeout="2m" -n $GUID-jenkins
 
 
 
