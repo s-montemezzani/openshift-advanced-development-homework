@@ -19,6 +19,13 @@ echo "Resetting Parks Production Environment in project ${GUID}-parks-prod to Gr
 
 # To be Implemented by Student
 
-oc patch route mlbparks-route -n $GUID-parks-prod -p '{"spec":{"to":{"name":"mlbparks-green"}}}'
-oc patch route nationalparks-route -n $GUID-parks-prod -p '{"spec":{"to":{"name":"nationalparks-green"}}}'
+
+
+#don't need to do anything, the reset_prod.sh script is only called once, just before the deploy to prod (expecting Blue)
+#since the microservices pipeline already handle that the first deploy is to Blue, we're fine
+
+#otherwise
+#delete mlbparks, nationalparks services
+#patch route parksmap to point to "placeholder"
+#oc patch route parksmap -n $GUID-parks-prod -p '{"spec":{"to":{"name":"parksmap-green"}}}'
 
