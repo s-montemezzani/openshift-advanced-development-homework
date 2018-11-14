@@ -85,3 +85,12 @@ oc process -f ./Infrastructure/templates/guid-jenkins/jenkins-persistent/jenkins
 sed "s/%GUID%/$GUID/g" ./Infrastructure/templates/guid-jenkins/jenkins_slave_pod/jenkins_slave_pod.yaml | oc create -n $GUID-jenkins -f -
 
 sed "s/%GUID%/$GUID/g;s/%CLUSTER%/$CLUSTER/g;s~%REPO%~$REPO~g" ./Infrastructure/templates/guid-jenkins/3apps_buildconfig_jenkins_pipeline.yaml | oc create -n $GUID-jenkins -f -
+
+#creating the buildconfig automatically starts a build
+#we only want the build to start from the mlbparks-pipeline invoked by the jenkins grading pipeline, otherwise we have multiple pipelines working simultaneously
+#there doesn't seem to be a "latest" option, but we know it's always the number 1 since we just created it...
+
+oc cancel-build mlbparks-pipeline-1 -n $GUID-jenkins
+oc cancel-build nationalparks-pipeline-1 -n $GUID-jenkins
+oc cancel-build parksmap-pipeline-1 -n $GUID-jenkins
+

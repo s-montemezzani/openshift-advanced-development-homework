@@ -10,6 +10,11 @@ oc start-build mlbparks-pipeline -n $GUID-jenkins
 oc start-build nationalparks-pipeline -n $GUID-jenkins
 oc start-build parksmap-pipeline -n $GUID-jenkins
 
+oc cancel-build mlbparks-pipeline -n $GUID-jenkins
+oc cancel-build nationalparks-pipeline -n $GUID-jenkins
+oc cancel-build parksmap-pipeline -n $GUID-jenkins
+
+
 oc expose mlbparks-dev
 oc rollout latest mlbparks-dev -n ${GUID}-parks-dev
 
