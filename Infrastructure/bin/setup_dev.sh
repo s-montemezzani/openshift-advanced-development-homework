@@ -33,6 +33,10 @@ echo "Setting up Parks Development Environment in project ${GUID}-parks-dev"
  #Set up liveness and readiness probes
  #Expose and label the services properly (parksmap-backend)
 
+
+: <<'COMMENT_DELIMITER'
+###reference only, sometimes towards the end some things were changed directly in the .yaml file
+
 oc policy add-role-to-user edit system:serviceaccount:$GUID-jenkins:jenkins -n $GUID-parks-dev
 
 #oc new-app registry.access.redhat.com/rhscl/mongodb-34-rhel7:latest --name="mongodb"
@@ -129,6 +133,13 @@ oc set deployment-hook --post dc/mlbparks-dev --failure-policy="abort" -n $GUID-
 
 oc export dc,bc,is,cm,svc > 3apps_dev_binary_builds.yaml
 
+
+COMMENT_DELIMITER
+
+
+oc policy add-role-to-user edit system:serviceaccount:$GUID-jenkins:jenkins -n $GUID-parks-dev
 oc policy add-role-to-user view --serviceaccount=default -n $GUID-parks-dev
+sed "s/%GUID%/$GUID/g" ../templates/guid-parks-dev/mongodb_dev.yaml | oc create -n $GUID-parks-dev -f -
+
 sed "s/%GUID%/$GUID/g" ../templates/guid-parks-dev/3apps_dev_binary_builds.yaml | oc create -n $GUID-parks-dev -f -
 

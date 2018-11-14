@@ -7,6 +7,44 @@ export CLUSTER=https://master.na39.openshift.opentlc.com
 ~/Infrastructure/bin/setup_jenkins.sh mons-5c83 repo https://master.na39.openshift.opentlc.com
 
 oc start-build mlbparks-pipeline -n $GUID-jenkins
+oc start-build nationalparks-pipeline -n $GUID-jenkins
+oc start-build parksmap-pipeline -n $GUID-jenkins
 
 oc expose mlbparks-dev
 oc rollout latest mlbparks-dev -n ${GUID}-parks-dev
+
+
+#manual, not using JenkinsFile
+#transfer manually the jar/war
+oc start-build parksmap-dev --follow --from-file=./parksmap.jar -n ${GUID}-parks-dev
+oc tag parksmap-dev:latest parksmap-dev:xxx -n ${GUID}-parks-dev
+oc set image dc/parksmap-dev parksmap-dev=docker-registry.default.svc:5000/${GUID}-parks-dev/parksmap-dev:xxx -n ${GUID}-parks-dev
+
+oc rollout latest parksmap-dev -n ${GUID}-parks-dev
+
+oc set image dc/parksmap-blue parksmap-blue=docker-registry.default.svc:5000/${GUID}-parks-dev/parksmap-dev:xxx -n ${GUID}-parks-prod
+
+oc rollout latest parksmap-blue -n ${GUID}-parks-prod
+
+
+oc start-build mlbparks-dev --follow --from-file=./mlbparks.jar -n ${GUID}-parks-dev
+oc tag mlbparks-dev:latest mlbparks-dev:xxx -n ${GUID}-parks-dev
+oc set image dc/mlbparks-dev mlbparks-dev=docker-registry.default.svc:5000/${GUID}-parks-dev/mlbparks-dev:xxx -n ${GUID}-parks-dev
+
+oc rollout latest mlbparks-dev -n ${GUID}-parks-dev
+
+oc set image dc/mlbparks-blue mlbparks-blue=docker-registry.default.svc:5000/${GUID}-parks-dev/mlbparks-dev:xxx -n ${GUID}-parks-prod
+
+oc rollout latest mlbparks-blue -n ${GUID}-parks-prod
+
+
+
+
+
+
+
+
+
+
+oc expose svc/mlbparks-green --name mlbparks-route -n $GUID-parks-prod
+oc expose svc/nationalparks-green --name nationalparks-route -n $GUID-parks-prod

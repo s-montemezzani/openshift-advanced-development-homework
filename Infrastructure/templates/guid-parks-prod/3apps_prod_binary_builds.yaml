@@ -28,7 +28,7 @@ items:
           execNewPod:
             command:
             - curl
-            - mlbparks-green.%GUID%-parks-prod.svc.cluster.local:8080/ws/data/load/
+            - mlbparks-green-for-post-deployment-hook:8080/ws/data/load/
             containerName: mlbparks-green
           failurePolicy: Abort
         timeoutSeconds: 600
@@ -147,7 +147,7 @@ items:
           execNewPod:
             command:
             - curl
-            - nationalparks-green.%GUID%-parks-prod.svc.cluster.local:8080/ws/data/load/
+            - nationalparks-green-for-post-deployment-hook:8080/ws/data/load/
             containerName: nationalparks-dev
           failurePolicy: Abort
         timeoutSeconds: 600
@@ -380,7 +380,7 @@ items:
           execNewPod:
             command:
             - curl
-            - mlbparks-blue.%GUID%-parks-prod.svc.cluster.local:8080/ws/data/load/
+            - mlbparks-blue-for-post-deployment-hook:8080/ws/data/load/
             containerName: mlbparks-blue
           failurePolicy: Abort
         timeoutSeconds: 600
@@ -499,7 +499,7 @@ items:
           execNewPod:
             command:
             - curl
-            - nationalparks-blue.%GUID%-parks-prod.svc.cluster.local:8080/ws/data/load/
+            - nationalparks-blue-for-post-deployment-hook:8080/ws/data/load/
             containerName: nationalparks-blue
           failurePolicy: Abort
         timeoutSeconds: 600
@@ -745,6 +745,83 @@ items:
     type: ClusterIP
   status:
     loadBalancer: {}
+
+#these services are only needed for the postdeployment hook. In particular we don't want the label type: parksmap-backend on these services
+#this is because the postdeployment-hook runs in a separate pod than the actual application.
+#This means we cannot do curl current_pod_ip:8080 (current_pod_ip would be retrievable with downward API) but must refer to the service
+#mlbparks-blue-7-hook-post
+#mlbparks-blue-7-deploy
+#mlbparks-blue-7-q2gnk
+
+#green services
+- apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: null
+    name: mlbparks-green-for-post-deployment-hook
+  spec:
+    ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      app: mlbparks-green
+      deploymentconfig: mlbparks-green
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: null
+    name: nationalparks-green-for-post-deployment-hook
+  spec:
+    ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      app: nationalparks-green
+      deploymentconfig: nationalparks-green
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+
+#blue services
+- apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: null
+    name: mlbparks-blue-for-post-deployment-hook
+  spec:
+    ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      app: mlbparks-blue
+      deploymentconfig: mlbparks-blue
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: null
+    name: nationalparks-blue-for-post-deployment-hook
+  spec:
+    ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      app: nationalparks-blue
+      deploymentconfig: nationalparks-blue
+    sessionAffinity: None
+    type: ClusterIP
+  status:
 
 #green configmaps
 - apiVersion: v1

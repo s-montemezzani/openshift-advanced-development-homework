@@ -29,6 +29,8 @@ echo "Setting up Jenkins in project ${GUID}-jenkins from Git Repo ${REPO} for Cl
 # To be Implemented by Student
 
 
+: <<'COMMENT_DELIMITER'
+###reference only, sometimes towards the end some things were changed directly in the .yaml file
 
 
 ########################## start jenkins persistent
@@ -38,37 +40,48 @@ oc process -f ../templates/guid-jenkins/jenkins-persistent/jenkins-persistent-te
 
 ########################## start maven slave pod with skopeo
 #we probably cannot switch to root user => cannot use these commands
-#docker build ../templates/docker___jenkins_slave_pod \
-#-t docker-registry-default.apps.$GUID.example.opentlc.com/xyz-jenkins/jenkins-slave-maven-appdev:v3.9
+docker build ../templates/docker___jenkins_slave_pod \
+-t docker-registry-default.apps.$GUID.example.opentlc.com/xyz-jenkins/jenkins-slave-maven-appdev:v3.9
 
-#cat ../templates/guid-jenkins/docker___jenkins_slave_pod/Dockerfile | oc new-build --name=jenkins-slave-appdev -n $GUID-jenkins -D -
-#oc export bc,is -l build=jenkins-slave-appdev > jenkins_slave_pod.yaml
+cat ../templates/guid-jenkins/docker___jenkins_slave_pod/Dockerfile | oc new-build --name=jenkins-slave-appdev -n $GUID-jenkins -D -
+oc export bc,is -l build=jenkins-slave-appdev > jenkins_slave_pod.yaml
 
 sed "s/%GUID%/$GUID/g" ../templates/guid-jenkins/jenkins_slave_pod/jenkins_slave_pod.yaml | oc create -n $GUID-jenkins -f -
 
 #build already started with above oc create
-#oc start-build bc/jenkins-slave-appdev
+oc start-build bc/jenkins-slave-appdev
 ########################## end maven slave pod with skopeo
 
 
 
 ########################## start build for each microservice
 #MLBParks
-#oc new-build --name=mlbparks-pipeline $REPO --context-dir=MLBParks -n $GUID-jenkins
+oc new-build --name=mlbparks-pipeline $REPO --context-dir=MLBParks -n $GUID-jenkins
 #NationalParks
-#oc new-build --name=nationalparks-pipeline $REPO --context-dir=Nationalparks -n $GUID-jenkins
+oc new-build --name=nationalparks-pipeline $REPO --context-dir=Nationalparks -n $GUID-jenkins
 #ParksMap
-#oc new-build --name=parksmap-pipeline $REPO --context-dir=ParksMap -n $GUID-jenkins
+oc new-build --name=parksmap-pipeline $REPO --context-dir=ParksMap -n $GUID-jenkins
 
 #########start environment variables
-#oc set env bc/mlbparks-pipeline GUID=$GUID CLUSTER=$CLUSTER REPO=$REPO -n $GUID-jenkins
-#oc set env bc/nationalparks-pipeline GUID=$GUID CLUSTER=$CLUSTER REPO=$REPO -n $GUID-jenkins
-#oc set env bc/parksmap-pipeline GUID=$GUID CLUSTER=$CLUSTER REPO=$REPO -n $GUID-jenkins
+oc set env bc/mlbparks-pipeline GUID=$GUID CLUSTER=$CLUSTER REPO=$REPO -n $GUID-jenkins
+oc set env bc/nationalparks-pipeline GUID=$GUID CLUSTER=$CLUSTER REPO=$REPO -n $GUID-jenkins
+oc set env bc/parksmap-pipeline GUID=$GUID CLUSTER=$CLUSTER REPO=$REPO -n $GUID-jenkins
 #########END environment variables
 
 #remove the skopeo bc before running this
-#oc export bc > 3apps_buildconfig_jenkins_pipeline.yaml
+oc export bc > 3apps_buildconfig_jenkins_pipeline.yaml
 
-sed "s/%GUID%/$GUID/g;s/%CLUSTER%/$CLUSTER/g;s~%REPO%~$REPO~g" ../templates/guid-jenkins/3apps_buildconfig_jenkins_pipeline.yaml | oc create -n $GUID-jenkins -f -
 
 ############################end build for each microservice
+
+
+
+
+
+COMMENT_DELIMITER
+
+oc process -f ../templates/guid-jenkins/jenkins-persistent/jenkins-persistent-template.yaml --param ENABLE_OAUTH=true --param MEMORY_LIMIT=2Gi --param VOLUME_CAPACITY=4Gi --param CPU_LIMIT=2000m | oc create -n $GUID-jenkins -f -
+
+sed "s/%GUID%/$GUID/g" ../templates/guid-jenkins/jenkins_slave_pod/jenkins_slave_pod.yaml | oc create -n $GUID-jenkins -f -
+
+sed "s/%GUID%/$GUID/g;s/%CLUSTER%/$CLUSTER/g;s~%REPO%~$REPO~g" ../templates/guid-jenkins/3apps_buildconfig_jenkins_pipeline.yaml | oc create -n $GUID-jenkins -f -

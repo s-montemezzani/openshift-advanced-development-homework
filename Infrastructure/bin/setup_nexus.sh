@@ -30,32 +30,34 @@ echo "Setting up Nexus in project $GUID-nexus"
 
 # To be Implemented by Student
 
+: <<'COMMENT_DELIMITER'
+###reference only, sometimes towards the end some things were changed directly in the .yaml file
 
 ########################## start first setup with 'oc commands', then turning into .yaml templates
-#comment#oc new-app docker.io/sonatype/nexus3:latest
-#comment#oc rollout pause dc nexus3
-#comment#oc patch dc nexus3 --patch='{ "spec": { "strategy": { "type": "Recreate" }}}'
-#comment#oc set resources dc nexus3 --limits=memory=2Gi,cpu=2 --requests=memory=1Gi,cpu=500m
-#comment#echo "apiVersion: v1
-#comment#kind: PersistentVolumeClaim
-#comment#metadata:
-  #comment#name: nexus-pvc
-#comment#spec:
-  #comment#accessModes:
-  #comment#- ReadWriteOnce
-  #comment#resources:
-    #comment#requests:
-      #comment#storage: 4Gi" | oc create -f -
+oc new-app docker.io/sonatype/nexus3:latest
+oc rollout pause dc nexus3
+oc patch dc nexus3 --patch='{ "spec": { "strategy": { "type": "Recreate" }}}'
+oc set resources dc nexus3 --limits=memory=2Gi,cpu=2 --requests=memory=1Gi,cpu=500m
+echo "apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nexus-pvc
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 4Gi" | oc create -f -
 
-#comment#oc set volume dc/nexus3 --add --overwrite --name=nexus3-volume-1 --mount-path=/nexus-data/ --type persistentVolumeClaim --claim-name=nexus-pvc
-#comment#oc set probe dc/nexus3 --liveness --failure-threshold 3 --initial-delay-seconds 60 -- echo ok
-#comment#oc set probe dc/nexus3 --readiness --failure-threshold 3 --initial-delay-seconds 60 --get-url=http://:8081/repository/maven-public/
+oc set volume dc/nexus3 --add --overwrite --name=nexus3-volume-1 --mount-path=/nexus-data/ --type persistentVolumeClaim --claim-name=nexus-pvc
+oc set probe dc/nexus3 --liveness --failure-threshold 3 --initial-delay-seconds 60 -- echo ok
+oc set probe dc/nexus3 --readiness --failure-threshold 3 --initial-delay-seconds 60 --get-url=http://:8081/repository/maven-public/
 
-#comment#oc rollout resume dc nexus3
+oc rollout resume dc nexus3
 
-#comment#oc expose dc nexus3 --port=5000 --name=nexus-registry
+oc expose dc nexus3 --port=5000 --name=nexus-registry
 
-#comment#oc export dc,is,svc,pvc > nexus.yaml
+oc export dc,is,svc,pvc > nexus.yaml
 #change mons-5c83 with %GUID%
 #image stream will be trying to pull from docker-registry.default.svc:5000/mons-5c83-nexus/nexus3 , where the image is not available
 #  => change spec/tags/from/name to the external registry docker.io/sonatype/nexus3
@@ -67,12 +69,18 @@ echo "Setting up Nexus in project $GUID-nexus"
 #
 
 #for routes
-#comment#oc expose svc nexus3
-#comment#oc create route edge nexus-registry --service=nexus-registry --port=5000
-#comment#oc export route > nexus_routes.yaml
+oc expose svc nexus3
+oc create route edge nexus-registry --service=nexus-registry --port=5000
+oc export route > nexus_routes.yaml
 #change mons-5c83 with %GUID%
 
 ########################## end first setup with 'oc commands', then turning into .yaml templates
+
+
+
+
+COMMENT_DELIMITER
+
 
 sed "s/%GUID%/$GUID/g" ../templates/guid-nexus/nexus.yaml | oc create -n $GUID-nexus -f -
 
