@@ -86,11 +86,31 @@ sed "s/%GUID%/$GUID/g" ./Infrastructure/templates/guid-jenkins/jenkins_slave_pod
 
 sed "s/%GUID%/$GUID/g;s/%CLUSTER%/$CLUSTER/g;s~%REPO%~$REPO~g" ./Infrastructure/templates/guid-jenkins/3apps_buildconfig_jenkins_pipeline.yaml | oc create -n $GUID-jenkins -f -
 
+
 #creating the buildconfig automatically starts a build
 #we only want the build to start from the mlbparks-pipeline invoked by the jenkins grading pipeline, otherwise we have multiple pipelines working simultaneously
-#there doesn't seem to be a "latest" option, but we know it's always the number 1 since we just created it...
 
-oc cancel-build mlbparks-pipeline-1 -n $GUID-jenkins
-oc cancel-build nationalparks-pipeline-1 -n $GUID-jenkins
-oc cancel-build parksmap-pipeline-1 -n $GUID-jenkins
+#even after jenkins is up and running (is this relevant? well, it's a jenkins build that tries to use a jenkins in the same namespace if available, so I guess yes), the oc cancel-build command doesn't work right away; error is the following:
+#error: build mons-5c83-jenkins/mlbparks-pipeline-1 failed to cancel: timed out waiting for the condition
+#error: failure during the build cancellation
+#=> either use long timeout in oc cancel-build or just oc delete build ...
+#there doesn't seem to be a "latest" option, but we know it's always the number 1 since we just created it...
+#oc cancel-build mlbparks-pipeline-1 -n $GUID-jenkins
+#oc cancel-build nationalparks-pipeline-1 -n $GUID-jenkins
+#oc cancel-build parksmap-pipeline-1 -n $GUID-jenkins
+
+oc delete build mlbparks-pipeline-1
+oc delete build nationalparks-pipeline-1
+oc delete build parksmap-pipeline-1
+
+while : ; do
+   echo "Checking if Jenkins is Ready..."
+   #oc get pod -n ${GUID}-jenkins |grep '\-2\-'|grep -v deploy|grep "1/1"
+   oc get pod -n ${GUID}-jenkins | grep jenkins | grep -v deploy | grep -v slave-appdev | grep "1/1" | grep Running
+   [[ "$?" == "1" ]] || break
+   echo "...no. Sleeping 10 seconds."
+   sleep 10
+done
+
+
 
