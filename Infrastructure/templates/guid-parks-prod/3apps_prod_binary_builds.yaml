@@ -105,7 +105,7 @@ items:
             timeoutSeconds: 1
           resources:
             limits:
-              cpu: "250m"
+              cpu: "400m"
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
         dnsPolicy: ClusterFirst
@@ -463,7 +463,7 @@ items:
             timeoutSeconds: 1
           resources:
             limits:
-              cpu: "250m"
+              cpu: "400m"
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
         dnsPolicy: ClusterFirst

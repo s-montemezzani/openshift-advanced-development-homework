@@ -112,9 +112,9 @@ while : ; do
    sleep 10
 done
 
-oc cancel-build mlbparks-pipeline-1 --request-timeout="2m" -n $GUID-jenkins
-oc cancel-build nationalparks-pipeline-1 --request-timeout="2m" -n $GUID-jenkins
-oc cancel-build parksmap-pipeline-1 --request-timeout="2m" -n $GUID-jenkins
+#oc cancel-build mlbparks-pipeline-1 --request-timeout="2m" -n $GUID-jenkins
+#oc cancel-build nationalparks-pipeline-1 --request-timeout="2m" -n $GUID-jenkins
+#oc cancel-build parksmap-pipeline-1 --request-timeout="2m" -n $GUID-jenkins
 
 
 
