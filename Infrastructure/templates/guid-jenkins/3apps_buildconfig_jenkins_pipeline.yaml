@@ -23,7 +23,7 @@ items:
       type: Git
     strategy:
       jenkinsPipelineStrategy:
-        env:G
+        env:
         - name: GUID
           value: %GUID%
         - name: CLUSTER
