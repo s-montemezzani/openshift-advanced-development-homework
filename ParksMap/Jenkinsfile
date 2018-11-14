@@ -21,8 +21,163 @@ podTemplate(
     // Also copy "../nexus_settings.xml" to your build directory
     // and replace 'GUID' in the file with your ${GUID} to point to >your< Nexus instance
 
+    stage('Checkout Source') {
+      git url: '$REPO'
+    }
+
+
+    // The following variables need to be defined at the top level
+    // and not inside the scope of a stage - otherwise they would not
+    // be accessible from other stages.
+    // Extract version and other properties from the pom.xml
+    def groupId    = getGroupIdFromPom("pom.xml")
+    def artifactId = getArtifactIdFromPom("pom.xml")
+    def version    = getVersionFromPom("pom.xml")
+    // Set the tag for the development image: version + build number
+    def devTag  = "${version}-${BUILD_NUMBER}"
+    // Set the tag for the production image: version
+    def prodTag = "${version}"
+    echo "devTag = ${devTag}"
+    echo "prodTag = ${prodTag}"
+
+    dir('ParksMap') {
+
+        stage('Modifying maven_settings.xml') {
+            sh "sed -i 's/%GUID%/${GUID}/g' ../nexus_settings.xml"
+        }
+
+
+        // Using Maven build the war file
+        // Do not run tests in this step
+        stage('Build war') {
+            echo "Building version ${version}"
+
+            sh "mvn -s ../nexus_settings.xml clean package spring-boot:repackage -DskipTests -Dcom.redhat.xpaas.repo.redhatga"
+        }
+
+        //not using parallel since the benefit is not much but it requires Declarative pipelines https://jenkins.io/doc/book/pipeline/syntax/ , which requires lots of syntax changes
+      // Using Maven run the unit tests
+      stage('Unit Tests') {
+        echo "Running Unit Tests"
+
+        sh "mvn -s ../nexus_settings.xml test"
+      }
+
+      // Using Maven call SonarQube for Code Analysis
+      stage('Code Analysis') {
+        echo "Running Code Analysis"
+
+        sh "mvn -s ../nexus_settings.xml sonar:sonar -Dsonar.host.url=http://sonarqube.${GUID}-sonarqube.svc.cluster.local:9000 -Dsonar.projectName=${JOB_BASE_NAME}-${devTag}"
+      }
+
+      // Publish the built war file to Nexus
+      stage('Publish to Nexus') {
+        echo "Publish to Nexus"
+
+        sh "mvn -s ../nexus_settings.xml deploy -DskipTests=true -DaltDeploymentRepository=nexus::default::http://nexus3.${GUID}-nexus.svc.cluster.local:8081/repository/releases"
+      }
+
+      // Build the OpenShift Image in OpenShift and tag it.
+      stage('Build and Tag OpenShift Image') {
+        echo "Building OpenShift container image tasks:${devTag}"
+
+        sh "oc start-build parksmap-dev --follow --from-file=./target/parksmap.jar -n ${GUID}-parks-dev"
+
+        openshiftVerifyBuild bldCfg: 'parksmap-dev', checkForTriggeredDeployments: 'false',
+                             namespace: '${GUID}-parks-dev', verbose: 'false', waitTime: ''
+        //just does some oc get builds into greps...
+        //https://github.com/openshift/jenkins-plugin
+
+        sh "oc tag parksmap-dev:latest parksmap-dev:${devTag} -n ${GUID}-parks-dev"
+      }
+
+      // Deploy the built image to the Development Environment.
+      stage('Deploy to Dev') {
+        echo "Deploying container image to Development Project"
+
+        sh "oc set image dc/parksmap-dev parksmap-dev=docker-registry.default.svc:5000/${GUID}-parks-dev/parksmap-dev:${devTag} -n ${GUID}-parks-dev"
+        sh "oc rollout latest parksmap-dev -n ${GUID}-parks-dev"
+
+        openshiftVerifyDeployment depCfg: 'parksmap-dev', namespace: '${GUID}-parks-dev', replicaCount: '1', verbose: 'false', verifyReplicaCount: 'false', waitTime: '', waitUnit: 'sec'
+        openshiftVerifyService namespace: '${GUID}-parks-dev', svcName: 'parksmap-dev', verbose: 'false'
+      }
+
+      // Run Integration Tests in the Development Environment.
+      stage('Integration Tests') {
+        echo "Running Integration Tests"
+
+        //part of the liveness probe, but we'll repeat
+        String healthz = sh(script: "curl parksmap-dev.${GUID}-parks-dev.svc.cluster.local:8080/ws/healthz/", returnStdout:true).trim();
+        if (!healthz.equals("OK")) {
+            currentBuild.result = 'ABORTED'
+            error('/ws/healthz return string was not correct. Was ${healthz}')
+        }
+
+        String info = sh(script: "curl parksmap-dev.${GUID}-parks-dev.svc.cluster.local:8080/ws/appname/", returnStdout:true).trim();
+        String expectedInfo = "ParksMap (Dev)"
+        if (!info.equals(expectedInfo)) {
+            currentBuild.result = 'ABORTED'
+            error('/ws/appname/ return string was not "${expectedInfo}". Was "${info}"')
+        }
+
+      }
+
+      // Copy Image to Nexus Docker Registry
+      stage('Copy Image to Nexus Docker Registry') {
+        echo "Copy image to Nexus Docker Registry"
+
+
+       sh "skopeo copy " +
+       "--src-tls-verify=false " +
+       "--dest-tls-verify=false " +
+       "--src-creds openshift:\$(oc whoami -t) " +
+       "--dest-creds admin:admin123 " +
+       "docker://docker-registry.default.svc.cluster.local:5000/${GUID}-parks-dev/parksmap-dev:${devTag} " +
+       "docker://nexus-registry.${GUID}-nexus.svc.cluster.local:5000/parksmap-dev:${devTag}"
+
+        // Tag the built image with the production tag.
+//        openshiftTag alias: 'false', destStream: 'tasks', destTag: prodTag, destinationNamespace: 'xyz-tasks-dev', namespace: 'xyz-tasks-dev', srcStream: 'tasks', srcTag: devTag, verbose: 'false'
+      sh "oc tag parksmap-dev:${devTag} parksmap-dev:${prodTag} -n ${GUID}-parks-dev"
+
+
+      }
+
+      // Blue/Green Deployment into Production
+      // -------------------------------------
+      // Do not activate the new version yet.
+      //start with deploying blue
+      def destApp   = "parksmap-blue"
+      def activeApp = ""
+
+      stage('Blue/Green Production Deployment') {
+          activeApp = sh(returnStdout: true, script: "oc get route parksmap -n ${GUID}-parks-prod -o jsonpath='{ .spec.to.name }'").trim()
+          if (activeApp == "parksmap-blue") {
+            destApp = "parksmap-green"
+          }
+          echo "Active Application:      " + activeApp
+          echo "Destination Application: " + destApp
+
+          // Update the Image on the Production Deployment Config
+          sh "oc set image dc/${destApp} ${destApp}=docker-registry.default.svc:5000/${GUID}-parks-dev/parksmap-dev:${prodTag} -n ${GUID}-parks-prod"
+          sh "oc rollout latest ${destApp} -n ${GUID}-parks-prod"
+
+          // Deploy the inactive application.
+          openshiftVerifyDeployment depCfg: destApp, namespace: '${GUID}-parks-prod', replicaCount: '1', verbose: 'false', verifyReplicaCount: 'true', waitTime: '', waitUnit: 'sec'
+          openshiftVerifyService namespace: '${GUID}-parks-prod', svcName: destApp, verbose: 'false'
+      }
+
+      stage('Switch over to new Version') {
+      //do it automatically
+//          input "Switch Production?"
+
+        echo "Switching Production application to ${destApp}."
+
+        sh 'oc patch route parksmap -n ${GUID}-parks-prod -p \'{"spec":{"to":{"name":"' + destApp + '"}}}\''
+      }
+    }
   }
 }
+
 
 // Convenience Functions to read variables from the pom.xml
 // Do not change anything below this line.
