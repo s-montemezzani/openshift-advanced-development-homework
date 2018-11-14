@@ -53,7 +53,7 @@ oc new-app registry.access.redhat.com/rhscl/mongodb-34-rhel7:latest --name="mong
 #oc set probe dc/mongodb --readiness --failure-threshold 3 --initial-delay-seconds -- stat /tmp/initialized
 #oc export svc,dc,is > mongodb.yaml
 
-sed "s/%GUID%/$GUID/g" ../templates/guid-parks-dev/mongodb_dev.yaml | oc create -n $GUID-parks-dev -f -
+sed "s/%GUID%/$GUID/g" ./Infrastructure/templates/guid-parks-dev/mongodb_dev.yaml | oc create -n $GUID-parks-dev -f -
 
 
 #let's make for each application a .yaml file with
@@ -139,7 +139,7 @@ COMMENT_DELIMITER
 
 oc policy add-role-to-user edit system:serviceaccount:$GUID-jenkins:jenkins -n $GUID-parks-dev
 oc policy add-role-to-user view --serviceaccount=default -n $GUID-parks-dev
-sed "s/%GUID%/$GUID/g" ../templates/guid-parks-dev/mongodb_dev.yaml | oc create -n $GUID-parks-dev -f -
+sed "s/%GUID%/$GUID/g" ./Infrastructure/templates/guid-parks-dev/mongodb_dev.yaml | oc create -n $GUID-parks-dev -f -
 
-sed "s/%GUID%/$GUID/g" ../templates/guid-parks-dev/3apps_dev_binary_builds.yaml | oc create -n $GUID-parks-dev -f -
+sed "s/%GUID%/$GUID/g" ./Infrastructure/templates/guid-parks-dev/3apps_dev_binary_builds.yaml | oc create -n $GUID-parks-dev -f -
 

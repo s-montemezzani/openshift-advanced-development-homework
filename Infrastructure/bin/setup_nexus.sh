@@ -26,7 +26,7 @@ echo "Setting up Nexus in project $GUID-nexus"
 # done
 
 # Ideally just calls a template
-# oc new-app -f ../templates/nexus.yaml --param .....
+# oc new-app -f ./Infrastructure/templates/nexus.yaml --param .....
 
 # To be Implemented by Student
 
@@ -82,7 +82,7 @@ oc export route > nexus_routes.yaml
 COMMENT_DELIMITER
 
 
-sed "s/%GUID%/$GUID/g" ../templates/guid-nexus/nexus.yaml | oc create -n $GUID-nexus -f -
+sed "s/%GUID%/$GUID/g" ./Infrastructure/templates/guid-nexus/nexus.yaml | oc create -n $GUID-nexus -f -
 
 while : ; do
    echo "Checking if Nexus is Ready..."

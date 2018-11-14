@@ -35,18 +35,18 @@ echo "Setting up Jenkins in project ${GUID}-jenkins from Git Repo ${REPO} for Cl
 
 ########################## start jenkins persistent
 #oc new-app jenkins-persistent --param ENABLE_OAUTH=true --param MEMORY_LIMIT=2Gi --param VOLUME_CAPACITY=4Gi
-oc process -f ../templates/guid-jenkins/jenkins-persistent/jenkins-persistent-template.yaml --param ENABLE_OAUTH=true --param MEMORY_LIMIT=2Gi --param VOLUME_CAPACITY=4Gi --param CPU_LIMIT=2000m | oc create -n $GUID-jenkins -f -
+oc process -f ./Infrastructure/templates/guid-jenkins/jenkins-persistent/jenkins-persistent-template.yaml --param ENABLE_OAUTH=true --param MEMORY_LIMIT=2Gi --param VOLUME_CAPACITY=4Gi --param CPU_LIMIT=2000m | oc create -n $GUID-jenkins -f -
 ########################## end jenkins persistent
 
 ########################## start maven slave pod with skopeo
 #we probably cannot switch to root user => cannot use these commands
-docker build ../templates/docker___jenkins_slave_pod \
+docker build ./Infrastructure/templates/docker___jenkins_slave_pod \
 -t docker-registry-default.apps.$GUID.example.opentlc.com/xyz-jenkins/jenkins-slave-maven-appdev:v3.9
 
-cat ../templates/guid-jenkins/docker___jenkins_slave_pod/Dockerfile | oc new-build --name=jenkins-slave-appdev -n $GUID-jenkins -D -
+cat ./Infrastructure/templates/guid-jenkins/docker___jenkins_slave_pod/Dockerfile | oc new-build --name=jenkins-slave-appdev -n $GUID-jenkins -D -
 oc export bc,is -l build=jenkins-slave-appdev > jenkins_slave_pod.yaml
 
-sed "s/%GUID%/$GUID/g" ../templates/guid-jenkins/jenkins_slave_pod/jenkins_slave_pod.yaml | oc create -n $GUID-jenkins -f -
+sed "s/%GUID%/$GUID/g" ./Infrastructure/templates/guid-jenkins/jenkins_slave_pod/jenkins_slave_pod.yaml | oc create -n $GUID-jenkins -f -
 
 #build already started with above oc create
 oc start-build bc/jenkins-slave-appdev
@@ -80,8 +80,8 @@ oc export bc > 3apps_buildconfig_jenkins_pipeline.yaml
 
 COMMENT_DELIMITER
 
-oc process -f ../templates/guid-jenkins/jenkins-persistent/jenkins-persistent-template.yaml --param ENABLE_OAUTH=true --param MEMORY_LIMIT=2Gi --param VOLUME_CAPACITY=4Gi --param CPU_LIMIT=2000m | oc create -n $GUID-jenkins -f -
+oc process -f ./Infrastructure/templates/guid-jenkins/jenkins-persistent/jenkins-persistent-template.yaml --param ENABLE_OAUTH=true --param MEMORY_LIMIT=2Gi --param VOLUME_CAPACITY=4Gi --param CPU_LIMIT=2000m | oc create -n $GUID-jenkins -f -
 
-sed "s/%GUID%/$GUID/g" ../templates/guid-jenkins/jenkins_slave_pod/jenkins_slave_pod.yaml | oc create -n $GUID-jenkins -f -
+sed "s/%GUID%/$GUID/g" ./Infrastructure/templates/guid-jenkins/jenkins_slave_pod/jenkins_slave_pod.yaml | oc create -n $GUID-jenkins -f -
 
-sed "s/%GUID%/$GUID/g;s/%CLUSTER%/$CLUSTER/g;s~%REPO%~$REPO~g" ../templates/guid-jenkins/3apps_buildconfig_jenkins_pipeline.yaml | oc create -n $GUID-jenkins -f -
+sed "s/%GUID%/$GUID/g;s/%CLUSTER%/$CLUSTER/g;s~%REPO%~$REPO~g" ./Infrastructure/templates/guid-jenkins/3apps_buildconfig_jenkins_pipeline.yaml | oc create -n $GUID-jenkins -f -

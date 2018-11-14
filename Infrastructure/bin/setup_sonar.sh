@@ -11,7 +11,7 @@ echo "Setting up Sonarqube in project $GUID-sonarqube"
 
 # Code to set up the SonarQube project.
 # Ideally just calls a template
-# oc new-app -f ../templates/sonarqube.yaml --param .....
+# oc new-app -f ./Infrastructure/templates/sonarqube.yaml --param .....
 
 # To be Implemented by Student
 
@@ -23,7 +23,7 @@ oc new-app --template=postgresql-persistent --param POSTGRESQL_USER=sonar --para
 oc export template postgresql-persistent -n openshift > postgresql-persistent.yaml
 
 
-oc new-app --file=../templates/guid-sonarqube/postgresql-persistent.yaml --param POSTGRESQL_USER=sonar --param POSTGRESQL_PASSWORD=sonar --param POSTGRESQL_DATABASE=sonar --param VOLUME_CAPACITY=4Gi --labels=app=sonarqube_db
+oc new-app --file=./Infrastructure/templates/guid-sonarqube/postgresql-persistent.yaml --param POSTGRESQL_USER=sonar --param POSTGRESQL_PASSWORD=sonar --param POSTGRESQL_DATABASE=sonar --param VOLUME_CAPACITY=4Gi --labels=app=sonarqube_db
 
 
 oc new-app --docker-image=wkulhanek/sonarqube:6.7.4 --env=SONARQUBE_JDBC_USERNAME=sonar --env=SONARQUBE_JDBC_PASSWORD=sonar --env=SONARQUBE_JDBC_URL=jdbc:postgresql://postgresql/sonar --labels=app=sonarqube
@@ -59,7 +59,7 @@ oc expose service sonarqube
 
 COMMENT_DELIMITER
 
-oc new-app --file=../templates/guid-sonarqube/postgresql-persistent/postgresql-persistent.yaml --param POSTGRESQL_USER=sonar --param POSTGRESQL_PASSWORD=sonar --param POSTGRESQL_DATABASE=sonar --param VOLUME_CAPACITY=4Gi --labels=app=sonarqube_db -n $GUID-sonarqube
+oc new-app --file=./Infrastructure/templates/guid-sonarqube/postgresql-persistent/postgresql-persistent.yaml --param POSTGRESQL_USER=sonar --param POSTGRESQL_PASSWORD=sonar --param POSTGRESQL_DATABASE=sonar --param VOLUME_CAPACITY=4Gi --labels=app=sonarqube_db -n $GUID-sonarqube
 
 while : ; do
    echo "Checking if postgresql is Ready... For Sonarqube"
@@ -70,4 +70,4 @@ while : ; do
    sleep 10
 done
 
-sed "s/%GUID%/$GUID/g" ../templates/guid-sonarqube/sonar.yaml | oc create -n $GUID-sonarqube -f -
+sed "s/%GUID%/$GUID/g" ./Infrastructure/templates/guid-sonarqube/sonar.yaml | oc create -n $GUID-sonarqube -f -

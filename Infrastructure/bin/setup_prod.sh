@@ -19,8 +19,8 @@ oc policy add-role-to-group system:image-puller system:serviceaccounts:$GUID-par
 
 oc policy add-role-to-user view --serviceaccount=default -n $GUID-parks-dev
 
-sed "s/%GUID%/$GUID/g" ../templates/guid-parks-prod/mongodb_prod.yaml | oc create -n $GUID-parks-prod -f -
-sed "s/%GUID%/$GUID/g" ../templates/guid-parks-prod/3apps_prod_binary_builds.yaml | oc create -n $GUID-parks-prod -f -
+sed "s/%GUID%/$GUID/g" ./Infrastructure/templates/guid-parks-prod/mongodb_prod.yaml | oc create -n $GUID-parks-prod -f -
+sed "s/%GUID%/$GUID/g" ./Infrastructure/templates/guid-parks-prod/3apps_prod_binary_builds.yaml | oc create -n $GUID-parks-prod -f -
 
 
 
