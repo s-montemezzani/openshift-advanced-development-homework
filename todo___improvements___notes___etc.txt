@@ -1,0 +1,37 @@
+1) Post deployment hooks are run in (by default) a new pod of the same image as the original pod
+This means, if the original pod has very high limits/requests, so will the post deployment hook pod. Even though this pod's timelife is short, this can be an issue.
+Ideally, we would
+- create a container template with just what is needed to run the hook (curl) and low limits/requests
+- change the deploymentConfig to use the above container
+
+2) Post hook deployment are run in a different pod than the original pod. Since we have to curl port 8080 of the original pod, we need either
+- service, just for that (which is what was done in PRD)
+- original pod IP.
+  Since the post hook is run in a different pod, we cannot use backwards API to get this IP
+  If post hook pod had 'oc' command (by default "it doesn't", so we would need to use an appropriate container) with the relevant permissions we might be able to extract the original pod's IP
+
+Note: curl localhost:8080 or curl 127.0.0.1:8080 don't work anyway, even if run from within the original pod (Connection refused)
+Note: since we only need to "run successfully" the post hook once, a *workaround* might be to make it a readiness check. It would be attempted multiple times, but stop the first time that it returns a valid result (but in general the idea really is to run the post hook when you *know* the pod is ready...)
+
+For points 1 and 2, in general it seems like there are some missing features from Openshift/kubernetes in this regard.
+
+3) In order to use the approach
+- For the first time,
+  * run oc commands to create app/imagestream/deploymentconfig/...
+  * run oc export ... > file.yaml
+- For future times, run oc create -f file.yaml
+
+There are some changes that need to be performed on the exported files from oc export
+* imagestream
+  will be trying to pull from docker-registry.default.svc:5000/mons-5c83-nexus/nexus3 , where the image is not available
+  => change spec/tags/from/name to the external registry docker.io/sonatype/nexus3
+* persistentvolumeclaim
+  remove metadata/annotations
+         metadata/creationTimestamp
+         spec/volumeName
+* route
+  (not 100% sure)
+  remove spec/host
+* buildconfig (not 100% sure)
+  remove triggers if needed
+* maybe others
