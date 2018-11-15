@@ -350,7 +350,8 @@ items:
     labels:
       app: mlbparks-dev
       type: parksmap-backend
-    name: mlbparks-dev
+#like in grading jenkins pipeline
+    name: mlbparks
   spec:
     ports:
     - port: 8080
@@ -370,7 +371,8 @@ items:
     labels:
       app: nationalparks-dev
       type: parksmap-backend
-    name: nationalparks-dev
+#like in grading jenkins pipeline
+    name: nationalparks
   spec:
     ports:
     - port: 8080
@@ -388,7 +390,7 @@ items:
     creationTimestamp: null
     labels:
       app: parksmap-dev
-    name: parksmap-dev
+    name: parksmap
   spec:
     ports:
     - port: 8080
