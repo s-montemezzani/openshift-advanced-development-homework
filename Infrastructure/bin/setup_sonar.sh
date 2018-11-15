@@ -59,8 +59,8 @@ oc expose service sonarqube
 
 COMMENT_DELIMITER
 
-echo "sleeping 10 because... reasons..."
-sleep 10
+echo "sleeping 120 because... reasons..."
+sleep 120
 
 oc new-app --file=./Infrastructure/templates/guid-sonarqube/postgresql-persistent/postgresql-persistent.yaml --param POSTGRESQL_USER=sonar --param POSTGRESQL_PASSWORD=sonar --param POSTGRESQL_DATABASE=sonar --param VOLUME_CAPACITY=4Gi --param MEMORY_LIMIT=1024Mi --param CPU_LIMIT=1000m --labels=app=sonarqube_db -n $GUID-sonarqube
 
