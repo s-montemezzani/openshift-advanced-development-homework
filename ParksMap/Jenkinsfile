@@ -99,7 +99,7 @@ podTemplate(
         sh "oc rollout latest parksmap-dev -n ${GUID}-parks-dev"
 
         openshiftVerifyDeployment depCfg: 'parksmap-dev', namespace: '${GUID}-parks-dev', replicaCount: '1', verbose: 'false', verifyReplicaCount: 'false', waitTime: '', waitUnit: 'sec'
-        openshiftVerifyService namespace: '${GUID}-parks-dev', svcName: 'parksmap-dev', verbose: 'false'
+        openshiftVerifyService namespace: '${GUID}-parks-dev', svcName: 'parksmap', verbose: 'false'
       }
 
       // Run Integration Tests in the Development Environment.
@@ -107,13 +107,13 @@ podTemplate(
         echo "Running Integration Tests"
 
         //part of the liveness probe, but we'll repeat
-        String healthz = sh(script: "curl parksmap-dev.${GUID}-parks-dev.svc.cluster.local:8080/ws/healthz/", returnStdout:true).trim();
+        String healthz = sh(script: "curl parksmap.${GUID}-parks-dev.svc.cluster.local:8080/ws/healthz/", returnStdout:true).trim();
         if (!healthz.equals("OK")) {
             currentBuild.result = 'ABORTED'
             error('/ws/healthz return string was not correct. Was ${healthz}')
         }
 
-        String info = sh(script: "curl parksmap-dev.${GUID}-parks-dev.svc.cluster.local:8080/ws/appname/", returnStdout:true).trim();
+        String info = sh(script: "curl parksmap.${GUID}-parks-dev.svc.cluster.local:8080/ws/appname/", returnStdout:true).trim();
         String expectedInfo = "ParksMap (Dev)"
         if (!info.equals(expectedInfo)) {
             currentBuild.result = 'ABORTED'

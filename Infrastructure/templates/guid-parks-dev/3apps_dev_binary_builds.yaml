@@ -417,7 +417,7 @@ items:
       targetPort: 8080
     to:
       kind: Service
-      name: parksmap-dev
+      name: parksmap
       weight: 100
     wildcardPolicy: None
   status:

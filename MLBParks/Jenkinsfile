@@ -100,7 +100,7 @@ podTemplate(
         sh "oc rollout latest mlbparks-dev -n ${GUID}-parks-dev"
 
         openshiftVerifyDeployment depCfg: 'mlbparks-dev', namespace: '${GUID}-parks-dev', replicaCount: '1', verbose: 'false', verifyReplicaCount: 'false', waitTime: '', waitUnit: 'sec'
-        openshiftVerifyService namespace: '${GUID}-parks-dev', svcName: 'mlbparks-dev', verbose: 'false'
+        openshiftVerifyService namespace: '${GUID}-parks-dev', svcName: 'mlbparks', verbose: 'false'
       }
 
       // Run Integration Tests in the Development Environment.
@@ -108,7 +108,7 @@ podTemplate(
         echo "Running Integration Tests"
 
         //part of the liveness probe, but we'll repeat
-        String healthz = sh(script: "curl mlbparks-dev.${GUID}-parks-dev.svc.cluster.local:8080/ws/healthz", returnStdout:true).trim();
+        String healthz = sh(script: "curl mlbparks.${GUID}-parks-dev.svc.cluster.local:8080/ws/healthz", returnStdout:true).trim();
         if (!healthz.equals("OK")) {
             currentBuild.result = 'ABORTED'
             error('/ws/healthz return string was not correct. Was ${healthz}')
@@ -116,7 +116,7 @@ podTemplate(
 
         //the return string is actually hardcoded, doens't even need the DB => not much of an integration test...
         //populating the DB (/ws/data/load) makes /ws/data/all return the info, but there seems to be no way to clear the database => also that would not be much of an integration test...
-        String info = sh(script: "curl mlbparks-dev.${GUID}-parks-dev.svc.cluster.local:8080/ws/info", returnStdout:true).trim();
+        String info = sh(script: "curl mlbparks.${GUID}-parks-dev.svc.cluster.local:8080/ws/info", returnStdout:true).trim();
         String expectedInfo = "{\"id\":\"mlbparks\",\"displayName\":\"MLB Parks (Dev)\",\"center\":{\"latitude\":\"39.82\",\"longitude\":\"-98.57\"},\"zoom\":5}"
         if (!info.equals(expectedInfo)) {
             currentBuild.result = 'ABORTED'
