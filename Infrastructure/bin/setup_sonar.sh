@@ -71,3 +71,12 @@ while : ; do
 done
 
 sed "s/%GUID%/$GUID/g" ./Infrastructure/templates/guid-sonarqube/sonar.yaml | oc create -n $GUID-sonarqube -f -
+
+while : ; do
+   echo "Checking if Sonarqube is Ready..."
+   #oc get pod -n ${GUID}-sonarqube |grep '\-2\-'|grep -v deploy|grep "1/1"
+   oc get pod -n ${GUID}-sonarqube | grep sonarqube | grep -v deploy | grep "1/1" | grep Running
+   [[ "$?" == "1" ]] || break
+   echo "...no. Sleeping 10 seconds."
+   sleep 10
+done
