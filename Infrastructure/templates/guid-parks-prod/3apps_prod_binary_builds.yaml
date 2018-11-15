@@ -150,7 +150,7 @@ items:
             command:
             - curl
             - nationalparks-green-for-post-deployment-hook:8080/ws/data/load/
-            containerName: nationalparks-dev
+            containerName: nationalparks-green
           failurePolicy: Abort
         timeoutSeconds: 600
         updatePeriodSeconds: 1
