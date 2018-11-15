@@ -41,6 +41,7 @@ if [[ "$?" == "0" ]]; then
 oc delete svc nationalparks-blue -n ${GUID}-parks-prod
 fi
 
-#patch route parksmap to point to "placeholder"
+#patch route parksmap to point to "placeholder". returns 1 if it already pointed to placeholder
+if [[ "$(oc get route parksmap -n $GUID-parks-prod -o jsonpath='{ .spec.to.name }')" != "placeholder" ]]; then
 oc patch route parksmap -n $GUID-parks-prod -p '{"spec":{"to":{"name":"placeholder"}}}'
-
+fi
